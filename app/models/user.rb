@@ -3,28 +3,24 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
-  
-  # Friend requests sent by this user
-  has_many :sent_friend_requests, foreign_key: :sender_id, class_name: 'FriendRequest', dependent: :destroy
 
-  # Friend requests received by this user
-  has_many :received_friend_requests, foreign_key: :receiver_id, class_name: 'FriendRequest', dependent: :destroy
+  # Friend requests this user sent - get FriendRequest Objects
+  has_many :sent_requests, foreign_key: :sender_id, class_name: 'FriendRequest', dependent: :destroy
 
-  # Friends who accepted this user's friend requests
-  has_many :friends_from_sent_requests, -> { where(friend_requests: { status: 'accepted' }) },
-           through :sent_friend_requests, source: :receiver
-  
-  # Friends who sent the accepted request to become friends with this user
-  has_many :friends_from_received_requests, -> { where(friend_requests: { status: 'accepted' }) },
-           through :received_friend_requests, source: :sender
-  
-  # Pending friend requests this user sent
-  has_many :pending_sent_requests, -> { where(status: 'pending') }, 
-           class_name: 'FriendRequest', foreign_key: :sender_id
+  # Friend requests this user received - get FriendRequest Objects
+  has_many :received_requests, foreign_key: :receiver_id, class_name: 'FriendRequest', dependent: :destroy
 
-  # Pending friend requests this user received
-  has_many :pending_received_requests, -> { where(status: 'pending') },
-           class_name: 'FriendRequest', foreign_key: :received_id
+  # Friends who accepted this user's friend request
+  has_many :friends_from_sent_requests, -> { accepted }, through: :sent_requests, source: :receiver
+
+  # Friends who sent this user's a friend request
+  has_many :friends_from_received_requests, -> { accepted }, through: :received_requests, source: :sender
+
+  # Pending request this user sent
+  has_many :pending_sent_requests, -> { pending }, through: :sent_requests, source: :receiver
+
+  # Pending request this user received
+  has_many :pending_received_requests, -> { pending }, through: :received_requests, 
 
   # Get all friends (both directions)
   def friends
@@ -42,7 +38,7 @@ class User < ApplicationRecord
   end
 
   def friend_request_pending?(other_user)
-    sent_friend_requests.pending.exists?(receiver_id: other_user.id) ||
-      received_friend_requests.pending.exists?(sender_id: other_user.id)
+    sent_requests.pending.exists?(receiver_id: other_user.id) ||
+      received_requests.pending.exists?(sender_id: other_user.id)
   end
 end
