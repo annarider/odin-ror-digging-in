@@ -77,6 +77,21 @@ class UserTest < ActiveSupport::TestCase
     assert_not_includes alice.pending_sent_requests, charlie
   end
 
+  test "pending_received_requests returns only pending requests" do
+    # Arrange
+    alice = create_user(email: "alice@example.com")
+    bob = create_user(email: "bob@example.com")
+    charlie = create_user(email: "charlie@example.com")
+
+    FriendRequest.create!(sender: bob, receiver: alice, status: "pending")
+    FriendRequest.create!(sender: charlie, receiver: alice, status: "accepted")
+
+    # Act & Assert
+    assert_equal 1, alice.pending_received_requests.count
+    assert_includes alice.pending_received_requests, bob
+    assert_not_includes alice.pending_received_requests, charlie
+  end
+
   test "friend_request_pending? returns true when pending request exists" do
     # Arrange
     alice = create_user(email: "alice@example.com")
