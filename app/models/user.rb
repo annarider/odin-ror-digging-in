@@ -25,7 +25,7 @@ class User < ApplicationRecord
   def friends_ids
     friends_from_sent_requests.pluck(:id) + friends_from_received_requests.pluck(:id)
   end
-
+ 
   # Is this user a friend?
   def friend?(other_user)
     friend_ids.include?(other_user.id)
