@@ -16,6 +16,9 @@ class User < ApplicationRecord
   # Friends who sent this user's a friend request
   has_many :friends_from_received_requests, -> { merge(FriendRequest.accepted) }, through: :received_requests, source: :sender
 
+  # Pending friend requests this user sent
+  has_many :pending_sent_requests, -> { merge(FriendRequest.pending) }, through: :sent_requests, source: :receiver
+
   # Get all friends (both directions)
   def friends
     User.where(id: friends_id)
