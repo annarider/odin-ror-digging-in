@@ -11,10 +11,10 @@ class User < ApplicationRecord
   has_many :received_requests, foreign_key: :receiver_id, class_name: 'FriendRequest', dependent: :destroy
 
   # Friends who accepted this user's friend request
-  has_many :friends_from_sent_requests, -> { accepted }, through: :sent_requests, source: :receiver
+  has_many :friends_from_sent_requests, -> { merge(FriendRequest.accepted) }, through: :sent_requests, source: :receiver
 
   # Friends who sent this user's a friend request
-  has_many :friends_from_received_requests, -> { accepted }, through: :received_requests, source: :sender
+  has_many :friends_from_received_requests, -> { merge(FriendRequest.accepted) }, through: :received_requests, source: :sender
 
   # Get all friends (both directions)
   def friends
