@@ -4,6 +4,9 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  # Posts association
+  has_many :posts, dependent: :destroy
+
   # Friend requests this user sent - get FriendRequest Objects
   has_many :sent_requests, foreign_key: :sender_id, class_name: 'FriendRequest', dependent: :destroy
 
