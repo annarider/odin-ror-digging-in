@@ -2,10 +2,10 @@
 
 one:
   content: MyText
-  image: MyString
+  image:
   user: one
 
 two:
   content: MyText
-  image: MyString
+  image:
   user: two
