@@ -1,0 +1,24 @@
+<%= form_with model: @post do |form| %>
+  <% if post.errors.any? %>
+    <div class="errors">
+      <h3><%= pluralize(@post.errors.count, "error") %> prevented this post from being saved:</h3>
+      <ul>
+        <% @post.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :content %>
+    <%= form.text_area :content %>
+  </div>
+
+  <div>
+    <%= form.label :image %>
+    <%= form.text_field :image %>
+  </div>
+
+  <%= form.submit %>
+<% end %>
