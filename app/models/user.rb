@@ -22,6 +22,9 @@ class User < ApplicationRecord
   # Pending friend requests this user received
   has_many :pending_received_requests, -> { merge(FriendRequest.pending) }, through: :received_requests, source: :sender
 
+  # Add validation rules
+  validates :name, presence: true
+
   # Get all friends (both directions)
   def friends
     User.where(id: friends_id)
