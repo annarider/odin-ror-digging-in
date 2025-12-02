@@ -2,8 +2,9 @@ require "test_helper"
 
 class FriendRequestTest < ActiveSupport::TestCase
   # Helper to create users quickly
-  def create_user(email:)
+  def create_user(name: , email:)
     User.create!(
+      name: name,
       email: email,
       password: "password123",
       password_confirmation: "password123"
@@ -15,8 +16,8 @@ class FriendRequestTest < ActiveSupport::TestCase
   # ===================
 
   test "belongs to sender" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     friend_request = FriendRequest.create!(
       sender: alice,
@@ -28,8 +29,8 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "belongs to receiver" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     friend_request = FriendRequest.create!(
       sender: alice,
@@ -45,8 +46,8 @@ class FriendRequestTest < ActiveSupport::TestCase
   # ===================
 
   test "is valid with valid attributes" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     friend_request = FriendRequest.new(
       sender: alice,
@@ -58,7 +59,7 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "is invalid without a sender" do
-    bob = create_user(email: "bob@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     friend_request = FriendRequest.new(
       receiver: bob,
@@ -70,7 +71,7 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "is invalid without a receiver" do
-    alice = create_user(email: "alice@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
 
     friend_request = FriendRequest.new(
       sender: alice,
@@ -82,8 +83,8 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "is invalid with invalid status" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     friend_request = FriendRequest.new(
       sender: alice,
@@ -96,31 +97,31 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "status pending is valid" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     friend_request = FriendRequest.new(sender: alice, receiver: bob, status: "pending")
     assert friend_request.valid?
   end
 
   test "status accepted is valid" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     friend_request = FriendRequest.new(sender: alice, receiver: bob, status: "accepted")
     assert friend_request.valid?
   end
 
   test "status rejected is valid" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     friend_request = FriendRequest.new(sender: alice, receiver: bob, status: "rejected")
     assert friend_request.valid?
   end
 
   test "cannot send friend request to yourself" do
-    alice = create_user(email: "alice@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
 
     friend_request = FriendRequest.new(
       sender: alice,
@@ -133,8 +134,8 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "cannot send duplicate friend request" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     FriendRequest.create!(sender: alice, receiver: bob, status: "pending")
 
@@ -149,8 +150,8 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "cannot send request if already friends" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     # Create accepted friendship
     FriendRequest.create!(sender: alice, receiver: bob, status: "accepted")
@@ -171,9 +172,9 @@ class FriendRequestTest < ActiveSupport::TestCase
   # ===================
 
   test "pending scope returns only pending requests" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
-    charlie = create_user(email: "charlie@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
+    charlie = create_user(name: "Charlie", email: "charlie@example.com")
 
     pending_request = FriendRequest.create!(sender: alice, receiver: bob, status: "pending")
     FriendRequest.create!(sender: alice, receiver: charlie, status: "accepted")
@@ -185,9 +186,9 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "accepted scope returns only accepted requests" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
-    charlie = create_user(email: "charlie@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
+    charlie = create_user(name: "Charlie", email: "charlie@example.com")
 
     FriendRequest.create!(sender: alice, receiver: bob, status: "pending")
     accepted_request = FriendRequest.create!(sender: alice, receiver: charlie, status: "accepted")
@@ -199,9 +200,9 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "rejected scope returns only rejected requests" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
-    charlie = create_user(email: "charlie@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
+    charlie = create_user(name: "Charlie", email: "charlie@example.com")
 
     FriendRequest.create!(sender: alice, receiver: bob, status: "pending")
     rejected_request = FriendRequest.create!(sender: alice, receiver: charlie, status: "rejected")
@@ -217,8 +218,8 @@ class FriendRequestTest < ActiveSupport::TestCase
   # ===================
 
   test "accept! changes status to accepted" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     friend_request = FriendRequest.create!(
       sender: alice,
@@ -232,8 +233,8 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "reject! changes status to rejected" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     friend_request = FriendRequest.create!(
       sender: alice,
@@ -251,8 +252,8 @@ class FriendRequestTest < ActiveSupport::TestCase
   # ===================
 
   test "can reject and then sender creates new request" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     # First request gets rejected
     first_request = FriendRequest.create!(sender: alice, receiver: bob, status: "pending")
@@ -264,8 +265,8 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "receiver can send request back to sender who was rejected" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     # Alice sends to Bob, Bob rejects
     first_request = FriendRequest.create!(sender: alice, receiver: bob, status: "pending")
@@ -277,9 +278,9 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "multiple users can send requests to same receiver" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
-    charlie = create_user(email: "charlie@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
+    charlie = create_user(name: "Charlie", email: "charlie@example.com")
 
     request1 = FriendRequest.create!(sender: alice, receiver: charlie, status: "pending")
     request2 = FriendRequest.create!(sender: bob, receiver: charlie, status: "pending")
@@ -289,9 +290,9 @@ class FriendRequestTest < ActiveSupport::TestCase
   end
 
   test "same user can send requests to multiple receivers" do
-    alice = create_user(email: "alice@example.com")
-    bob = create_user(email: "bob@example.com")
-    charlie = create_user(email: "charlie@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
+    charlie = create_user(name: "Charlie", email: "charlie@example.com")
 
     request1 = FriendRequest.create!(sender: alice, receiver: bob, status: "pending")
     request2 = FriendRequest.create!(sender: alice, receiver: charlie, status: "pending")
