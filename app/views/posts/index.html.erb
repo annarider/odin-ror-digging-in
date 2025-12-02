@@ -1,2 +1,19 @@
-<h1>Posts#index</h1>
-<p>Find me in app/views/posts/index.html.erb</p>
+<h1>Post Updates</h1>
+
+<%= link_to "Create New Post", new_post_path %>
+
+<div class="posts">
+  <% @posts.each do |post| %>
+    <div class="post">
+      <h2><%= link_to "Post by #{post.user.name}", post_path(post) %></h2>
+
+      <p><%= post.content %></p>
+
+      <% if post.image %>
+        <%= image_tag post.image %>
+      <% end %>
+
+      <p>Posted on: <%= post.created_at %></p>
+    </div>
+  <% end %>
+</div>
