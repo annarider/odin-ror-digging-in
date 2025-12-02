@@ -13,8 +13,8 @@ class UserTest < ActiveSupport::TestCase
 
   test "user can send a friend request" do
     # Arrange
-    sender = create_user(name: 'Sender', email: "sender@example.com")
-    receiver = create_user(name: 'Receiver', email: "receiver@example.com")
+    sender = create_user(name: "Sender", email: "sender@example.com")
+    receiver = create_user(name: "Receiver", email: "receiver@example.com")
 
     # Act
     friend_request = FriendRequest.create!(
@@ -30,8 +30,8 @@ class UserTest < ActiveSupport::TestCase
 
   test "user can receive a friend request" do
     # Arrange
-    sender = create_user(name: 'Sender', email: "sender@example.com")
-    receiver = create_user(name: 'Receiver', email: "receiver@example.com")
+    sender = create_user(name: "Sender", email: "sender@example.com")
+    receiver = create_user(name: "Receiver", email: "receiver@example.com")
 
     # Act
     friend_request = FriendRequest.create!(
@@ -47,8 +47,8 @@ class UserTest < ActiveSupport::TestCase
 
   test "users become friends when request is accepted" do
     # Arrange
-    alice = create_user(name: 'Alice', email: "alice@example.com")
-    bob = create_user(name: 'Bob', email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
     friend_request = FriendRequest.create!(
       sender: alice,
       receiver: bob,
@@ -65,9 +65,9 @@ class UserTest < ActiveSupport::TestCase
 
   test "pending_sent_requests returns only pending requests" do
     # Arrange
-    alice = create_user(name: 'Alice', email: "alice@example.com")
-    bob = create_user(name: 'Bob', email: "bob@example.com")
-    charlie = create_user(name: 'Charlie', email: "charlie@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
+    charlie = create_user(name: "Charlie", email: "charlie@example.com")
 
     FriendRequest.create!(sender: alice, receiver: bob, status: "pending")
     FriendRequest.create!(sender: alice, receiver: charlie, status: "accepted")
@@ -80,9 +80,9 @@ class UserTest < ActiveSupport::TestCase
 
   test "pending_received_requests returns only pending requests" do
     # Arrange
-    alice = create_user(name: 'Alice', email: "alice@example.com")
-    bob = create_user(name: 'Bob', email: "bob@example.com")
-    charlie = create_user(name: 'Charlie', email: "charlie@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
+    charlie = create_user(name: "Charlie", email: "charlie@example.com")
 
     FriendRequest.create!(sender: bob, receiver: alice, status: "pending")
     FriendRequest.create!(sender: charlie, receiver: alice, status: "accepted")
@@ -95,8 +95,8 @@ class UserTest < ActiveSupport::TestCase
 
   test "friend_request_pending? returns true when pending request exists" do
     # Arrange
-    alice = create_user(name: 'Alice', email: "alice@example.com")
-    bob = create_user(name: 'Bob', email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
     FriendRequest.create!(sender: alice, receiver: bob, status: "pending")
 
     # Act & Assert
@@ -106,8 +106,8 @@ class UserTest < ActiveSupport::TestCase
 
   test "friend_request_pending? returns false when no pending request" do
     # Arrange
-    alice = create_user(name: 'Alice', email: "alice@example.com")
-    bob = create_user(name: 'Bob', email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
 
     # Act & Assert
     assert_not alice.friend_request_pending?(bob)
@@ -115,8 +115,8 @@ class UserTest < ActiveSupport::TestCase
 
   test "deleting user destroys their sent friend requests" do
     # Arrange
-    alice = create_user(name: 'Alice', email: "alice@example.com")
-    bob = create_user(name: 'Bob', email: "bob@example.com")
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
     FriendRequest.create!(sender: alice, receiver: bob, status: "pending")
 
     # Act

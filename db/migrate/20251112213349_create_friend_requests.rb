@@ -8,6 +8,6 @@ class CreateFriendRequests < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :friend_requests, [:sender_id, :receiver_id], unique: true
+    add_index :friend_requests, [ :sender_id, :receiver_id ], unique: true
   end
 end

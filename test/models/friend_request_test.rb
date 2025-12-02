@@ -2,7 +2,7 @@ require "test_helper"
 
 class FriendRequestTest < ActiveSupport::TestCase
   # Helper to create users quickly
-  def create_user(name: , email:)
+  def create_user(name:, email:)
     User.create!(
       name: name,
       email: email,

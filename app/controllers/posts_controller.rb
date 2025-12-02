@@ -21,7 +21,7 @@ class PostsController < ApplicationController
     @post = current_user.posts.build(post_params)
 
     if @post.save
-      redirect_to post_path(@post), notice: 'New post created'
+      redirect_to post_path(@post), notice: "New post created"
     else
       render :new, status: :unprocessable_entity
     end

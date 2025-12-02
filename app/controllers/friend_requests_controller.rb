@@ -10,7 +10,7 @@ class FriendRequestsController < ApplicationController
     @friend_request = current_user.sent_requests.build(receiver_id: params[:receiver_id])
 
     if @friend_request.save
-      redirect_to users_path, notice: 'Friend request sent!'
+      redirect_to users_path, notice: "Friend request sent!"
     else
       redirect_to users_path, alert: "Couldn't send friend request."
     end
