@@ -21,28 +21,40 @@ class PostTest < ActiveSupport::TestCase
     assert_not @post.valid?
   end
 
-  test "should have many comments" do
-    assert_respond_to @post, :comments
-  end
-
-  test "should have many likes" do
-    assert_respond_to @post, :likes
-  end
-
-  test "should destroy associated comments when post is destroyed" do
+  test "can have comments added to it" do
     @post.save
-    @post.comments.create(content: "Great post!", user: users(:two))
-    assert_difference "Comment.count", -1 do
-      @post.destroy
-    end
+    comment = @post.comments.create(content: "Great post!", user: users(:two))
+
+    assert_includes @post.comments, comment
+    assert_equal 1, @post.comments.count
   end
 
-  test "should destroy associated likes when post is destroyed" do
+  test "can be liked by users" do
     @post.save
-    @post.likes.create(user: users(:two))
-    assert_difference "Like.count", -1 do
-      @post.destroy
-    end
+    like = @post.likes.create(user: users(:two))
+
+    assert_includes @post.likes, like
+    assert_equal 1, @post.likes.count
+  end
+
+  test "removes all comments when destroyed" do
+    @post.save
+    comment = @post.comments.create(content: "Great post!", user: users(:two))
+    comment_id = comment.id
+
+    @post.destroy
+
+    assert_nil Comment.find_by(id: comment_id)
+  end
+
+  test "removes all likes when destroyed" do
+    @post.save
+    like = @post.likes.create(user: users(:two))
+    like_id = like.id
+
+    @post.destroy
+
+    assert_nil Like.find_by(id: like_id)
   end
 
   test "should allow a post with empty image" do

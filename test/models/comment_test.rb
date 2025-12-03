@@ -21,30 +21,40 @@ class CommentTest < ActiveSupport::TestCase
     assert_not @comment.valid?
   end
 
-  test "should work with Post as commentable" do
-    @comment.commentable = @post
-    assert @comment.valid?
-    assert_equal "Post", @comment.commentable_type
+  test "can be added to a post" do
+    @comment.save
+
+    assert_includes @post.comments, @comment
+    assert_equal @post, @comment.commentable
   end
 
-  test "should work with Comment as commentable (nested comments)" do
+  test "can be replied to with another comment" do
     parent_comment = Comment.create(content: "Parent comment", user: @user, commentable: @post)
-    nested_comment = Comment.new(content: "Reply to comment", user: users(:two), commentable: parent_comment)
-    assert nested_comment.valid?
-    assert_equal "Comment", nested_comment.commentable_type
+    reply = Comment.create(content: "Reply to comment", user: users(:two), commentable: parent_comment)
+
+    # The reply should be associated with the parent comment
+    assert_equal parent_comment, reply.commentable
+    # Both comments should exist
+    assert Comment.exists?(parent_comment.id)
+    assert Comment.exists?(reply.id)
   end
 
-  test "should allow multiple comments on the same post" do
-    @comment.save
-    another_comment = Comment.new(content: "Another great tip!", user: users(:two), commentable: @post)
-    assert another_comment.valid?
-    assert another_comment.save
+  test "allows multiple users to comment on same post" do
+    first_comment = @post.comments.create(content: "First comment", user: @user)
+    second_comment = @post.comments.create(content: "Second comment", user: users(:two))
+
+    assert_equal 2, @post.comments.count
+    assert_includes @post.comments, first_comment
+    assert_includes @post.comments, second_comment
   end
 
-  test "should allow same user to comment multiple times on same post" do
-    @comment.save
-    another_comment = Comment.new(content: "Adding more thoughts...", user: @user, commentable: @post)
-    assert another_comment.valid?
-    assert another_comment.save
+  test "allows same user to add multiple comments" do
+    first_comment = @post.comments.create(content: "First thought", user: @user)
+    second_comment = @post.comments.create(content: "Adding more thoughts...", user: @user)
+
+    user_comments = @post.comments.where(user: @user)
+    assert_equal 2, user_comments.count
+    assert_includes user_comments, first_comment
+    assert_includes user_comments, second_comment
   end
 end
