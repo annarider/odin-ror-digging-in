@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  get "comments/create"
+  get "comments/edit"
+  get "comments/update"
+  get "comments/destroy"
   devise_for :users
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
