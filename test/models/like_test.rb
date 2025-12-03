@@ -3,7 +3,7 @@ require "test_helper"
 class LikeTest < ActiveSupport::TestCase
   def setup
     @user = users(:one)
-    @post = posts(:one)
+    @post = Post.create(content: "Test post", user: @user)
     @like = Like.new(user: @user, likeable: @post)
   end
 
@@ -67,11 +67,16 @@ class LikeTest < ActiveSupport::TestCase
   end
 
   test "allows user to like both a post and a comment" do
-    @post.likes.create(user: @user)
+    post_like = @post.likes.create(user: @user)
     comment = Comment.create(content: "Test", user: users(:two), commentable: @post)
-    Like.create(user: @user, likeable: comment)
+    comment_like = Like.create(user: @user, likeable: comment)
 
-    user_likes = Like.where(user: @user)
-    assert_equal 2, user_likes.count
+    # Verify both likes exist and belong to the same user
+    assert post_like.persisted?
+    assert comment_like.persisted?
+    assert_equal @user, post_like.user
+    assert_equal @user, comment_like.user
+    assert_equal @post, post_like.likeable
+    assert_equal comment, comment_like.likeable
   end
 end

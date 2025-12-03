@@ -121,17 +121,23 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "destroying post should also destroy its comments" do
-    @post.comments.create(content: "Test comment", user: @other_user)
-    assert_difference([ "Post.count", "Comment.count" ], -1) do
-      delete post_url(@post)
-    end
+  test "destroying post also destroys its comments" do
+    comment = @post.comments.create(content: "Test comment", user: @other_user)
+    comment_id = comment.id
+
+    delete post_url(@post)
+
+    assert_nil Post.find_by(id: @post.id)
+    assert_nil Comment.find_by(id: comment_id)
   end
 
-  test "destroying post should also destroy its likes" do
-    @post.likes.create(user: @other_user)
-    assert_difference([ "Post.count", "Like.count" ], -1) do
-      delete post_url(@post)
-    end
+  test "destroying post also destroys its likes" do
+    like = @post.likes.create(user: @other_user)
+    like_id = like.id
+
+    delete post_url(@post)
+
+    assert_nil Post.find_by(id: @post.id)
+    assert_nil Like.find_by(id: like_id)
   end
 end

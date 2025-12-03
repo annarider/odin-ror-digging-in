@@ -3,7 +3,7 @@ require "test_helper"
 class CommentTest < ActiveSupport::TestCase
   def setup
     @user = users(:one)
-    @post = posts(:one)
+    @post = Post.create(content: "Test post", user: @user)
     @comment = Comment.new(content: "Great gardening tips!", user: @user, commentable: @post)
   end
 

@@ -37,7 +37,7 @@ class PostTest < ActiveSupport::TestCase
     assert_equal 1, @post.likes.count
   end
 
-  test "removes all comments when destroyed" do
+  test "removes its comments when destroyed" do
     @post.save
     comment = @post.comments.create(content: "Great post!", user: users(:two))
     comment_id = comment.id
@@ -47,7 +47,7 @@ class PostTest < ActiveSupport::TestCase
     assert_nil Comment.find_by(id: comment_id)
   end
 
-  test "removes all likes when destroyed" do
+  test "removes its likes when destroyed" do
     @post.save
     like = @post.likes.create(user: users(:two))
     like_id = like.id

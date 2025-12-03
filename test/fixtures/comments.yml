@@ -3,11 +3,9 @@
 one:
   content: MyText
   user: one
-  commentable: one
-  commentable_type: Commentable
+  commentable: one (Post)
 
 two:
   content: MyText
   user: two
-  commentable: two
-  commentable_type: Commentable
+  commentable: two (Post)
