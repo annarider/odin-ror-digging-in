@@ -1,8 +1,4 @@
 Rails.application.routes.draw do
-  get "comments/create"
-  get "comments/edit"
-  get "comments/update"
-  get "comments/destroy"
   devise_for :users
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -17,5 +13,8 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
   resources :friend_requests, only: [ :index, :create, :update, :destroy ]
-  resources :posts
+  resources :posts do
+    resources :comments, only: [ :create ]
+  end
+  resources :comments, only: [ :update, :destroy ]
 end
