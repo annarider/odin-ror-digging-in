@@ -1,6 +1,4 @@
 Rails.application.routes.draw do
-  get "likes/create"
-  get "likes/destroy"
   devise_for :users
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -17,6 +15,10 @@ Rails.application.routes.draw do
   resources :friend_requests, only: [ :index, :create, :update, :destroy ]
   resources :posts do
     resources :comments, only: [ :create ]
+    resources :likes, only: [ :create ]
   end
-  resources :comments, only: [ :update, :destroy ]
+  resources :comments, only: [ :update, :destroy ] do
+    resources :likes, only: [ :create ]
+  end
+  resources :likes, only: [ :destroy ]
 end
