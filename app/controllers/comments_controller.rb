@@ -3,7 +3,8 @@ class CommentsController < ApplicationController
   before_action :set_post, only: [:create]
   before_action :set_comment, only: [:update, :destroy]
   def create
-    @comment = @post.comments.build(comment_params)
+    @commentable = find_commentable # polymorphic - could be post, comment, etc.
+    @comment = @commentable.comments.build(comment_params)
     @comment.user = current_user
 
     if @comment.save
@@ -35,6 +36,15 @@ class CommentsController < ApplicationController
   def set_comment
     @comment = Comment.find(params[:id])
     @post = @comment.post
+  end
+
+  def find_commentable
+    # Check params to find what user is commenting on
+    if params[:post_id]
+      Post.find(params[:post_id])
+    elsif params[:comment_id]
+      Comment.find(params[:comment_id])
+    end
   end
 
   def comment_params
