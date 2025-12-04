@@ -14,8 +14,6 @@ class CommentsController < ApplicationController
   end
 
   def update
-    @comment = Comment.find(params[:id])
-
     if @comment.update(comment_params)
       redirect_to @post
     else
@@ -24,7 +22,6 @@ class CommentsController < ApplicationController
   end
 
   def destroy
-    @comment = Comment.find(params[:id])
     @comment.destroy
     redirect_to @post, status: :see_other, notice: "Comment removed."
   end
