@@ -7,7 +7,52 @@
     <%= image_tag @post.image %>
   <% end %>
 
-  <p>Posted on: <%= @post.created_at %></p>
+  <p>Posted on: <%= @post.created_at.strftime("%B %d, %Y at %I:%M %p") %></p>
+
+  <!-- Likes Section -->
+  <div class="likes">
+    <p>
+      <strong><%= @post.likes.count %></strong>
+      <%= "like".pluralize(@post.likes.count) %>
+    </p>
+
+    <% if @post.likes.exists?(user: current_user) %>
+      <!-- User has already liked this post - show unlike button -->
+      <% user_like = @post.likes.find_by(user: current_user) %>
+      <%= button_to "Unlike", like_path(user_like), method: :delete %>
+    <% else %>
+      <!-- User hasn't liked this post - show like button -->
+      <%= button_to "Like", post_likes_path(@post), method: :post %>
+    <% end %>
+  </div>
+
+  <!-- Comments Section -->
+  <div class="comments">
+    <h3>Comments (<%= @post.comments.count %>)</h3>
+
+    <% @post.comments.each do |comment| %>
+      <div class="comment">
+        <p>
+          <strong><%= comment.user.name %></strong>
+          <small>- <%= time_ago_in_words(comment.created_at) %> ago</small>
+        </p>
+        <p><%= comment.content %></p>
+
+        <% if comment.user == current_user %>
+          <%= button_to "Delete", comment_path(comment), method: :delete, form: { data: { turbo_confirm: "Delete this comment?" } } %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <!-- New Comment Form -->
+    <h4>Add a comment</h4>
+    <%= form_with model: [ @post, Comment.new ], url: post_comments_path(@post), local: true do |f| %>
+      <div>
+        <%= f.text_area :content, rows: 3, placeholder: "Write a comment...", required: true %>
+      </div>
+      <%= f.submit "Post Comment" %>
+    <% end %>
+  </div>
 
   <%= link_to 'See all posts', posts_path %>
 
