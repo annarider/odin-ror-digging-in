@@ -2,7 +2,12 @@ class PostsController < ApplicationController
   before_action :authenticate_user!
 
   def index
-    @posts = current_user.posts
+    # Get IDs of the current user and all their friends
+    friend_ids = current_user.friends_ids
+    user_and_friend_ids = friend_ids + [ current_user.id ]
+
+    # Get posts from current user and all friends, ordered by most recent
+    @posts = Post.where(user_id: user_and_friend_ids).order(created_at: :desc)
   end
 
   def show
