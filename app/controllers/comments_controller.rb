@@ -1,14 +1,14 @@
 class CommentsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_post, only: [:create]
-  before_action :set_comment, only: [:update, :destroy]
+  before_action :set_comment, only: [ :update, :destroy ]
+
   def create
     @commentable = find_commentable # polymorphic - could be post, comment, etc.
     @comment = @commentable.comments.build(comment_params)
     @comment.user = current_user
 
     if @comment.save
-      redirect_to @post, notice: "Comment posted."
+      redirect_to root_post, notice: "Comment posted."
     else
       render "posts/show", status: :unprocessable_entity
     end
@@ -16,7 +16,7 @@ class CommentsController < ApplicationController
 
   def update
     if @comment.update(comment_params)
-      redirect_to @post
+      redirect_to root_post
     else
       render "posts/show", status: :unprocessable_entity
     end
@@ -24,18 +24,13 @@ class CommentsController < ApplicationController
 
   def destroy
     @comment.destroy
-    redirect_to @post, status: :see_other, notice: "Comment removed."
+    redirect_to root_post, status: :see_other, notice: "Comment removed."
   end
 
   private
 
-  def set_post
-    @post = Post.find(params[:post_id])
-  end
-
   def set_comment
-    @comment = Comment.find(params[:id])
-    @post = @comment.post
+    @comment = current_user.comments.find(params[:id])
   end
 
   def find_commentable
@@ -45,6 +40,17 @@ class CommentsController < ApplicationController
     elsif params[:comment_id]
       Comment.find(params[:comment_id])
     end
+  end
+
+  # Helper method to find the root post for any comment
+  # Traverses up the polymorphic chain to find the original Post
+  def root_post
+    commentable = @comment.commentable
+    # Keep going up the chain until we hit a Post
+    while commentable.is_a?(Comment)
+      commentable = commentable.commentable
+    end
+    commentable # This will be the Post
   end
 
   def comment_params
