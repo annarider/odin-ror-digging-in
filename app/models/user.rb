@@ -10,6 +10,9 @@ class User < ApplicationRecord
   # Comments association
   has_many :comments, dependent: :destroy
 
+  # Likes association
+  has_many :likes, dependent: :destroy
+
   # Friend requests this user sent - get FriendRequest Objects
   has_many :sent_requests, foreign_key: :sender_id, class_name: "FriendRequest", dependent: :destroy
 
