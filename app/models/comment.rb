@@ -5,4 +5,7 @@ class Comment < ApplicationRecord
 
   # Allows comments to have child comments
   has_many :comments, as: :commentable
+
+  # Allows comments to be liked
+  has_many :likes, as: :likeable, dependent: :destroy
 end
