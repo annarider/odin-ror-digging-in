@@ -38,9 +38,23 @@
         </p>
         <p><%= comment.content %></p>
 
-        <% if comment.user == current_user %>
-          <%= button_to "Delete", comment_path(comment), method: :delete, form: { data: { turbo_confirm: "Delete this comment?" } } %>
-        <% end %>
+        <!-- Comment Likes -->
+        <div class="comment-likes">
+          <small>
+            <strong><%= comment.likes.count %></strong> <%= "like".pluralize(comment.likes.count) %>
+          </small>
+
+          <% if comment.likes.exists?(user: current_user) %>
+            <% user_like = comment.likes.find_by(user: current_user) %>
+            <%= button_to "Unlike", like_path(user_like), method: :delete, class: "small-button" %>
+          <% else %>
+            <%= button_to "Like", comment_likes_path(comment), method: :post, class: "small-button" %>
+          <% end %>
+
+          <% if comment.user == current_user %>
+            <%= button_to "Delete", comment_path(comment), method: :delete, form: { data: { turbo_confirm: "Delete this comment?" } }, class: "small-button" %>
+          <% end %>
+        </div>
       </div>
     <% end %>
 
