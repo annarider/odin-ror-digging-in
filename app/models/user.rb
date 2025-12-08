@@ -46,7 +46,7 @@ class User < ApplicationRecord
 
   # Is this user a friend?
   def friend?(other_user)
-    friend_ids.include?(other_user.id)
+    friends_ids.include?(other_user.id)
   end
 
   def friend_request_pending?(other_user)
