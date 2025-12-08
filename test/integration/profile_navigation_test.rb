@@ -46,19 +46,20 @@ class ProfileNavigationTest < ActionDispatch::IntegrationTest
   test "navigates from post show page to author profile" do
     sign_in @user
 
-    post = Post.create!(user: @other_user, content: "Beautiful roses blooming")
+    # Create a post by the current user (since users can only view their own posts)
+    post = Post.create!(user: @user, content: "Beautiful roses blooming")
 
     # Visit post show page
     get post_path(post)
     assert_response :success
 
     # Verify link to author's profile exists
-    assert_select "a[href=?]", user_path(@other_user), text: @other_user.name
+    assert_select "a[href=?]", user_path(@user), text: @user.name
 
     # Navigate to author's profile
-    get user_path(@other_user)
+    get user_path(@user)
     assert_response :success
-    assert_select "h1", text: @other_user.name
+    assert_select "h1", text: @user.name
   end
 
   # Testing BEHAVIOR: User can navigate from post comments to commenter profile
@@ -66,9 +67,10 @@ class ProfileNavigationTest < ActionDispatch::IntegrationTest
   test "navigates from post comments to commenter profile" do
     sign_in @user
 
-    post = Post.create!(user: @other_user, content: "My garden post")
+    # Create post by current user (since users can only view their own posts)
+    post = Post.create!(user: @user, content: "My garden post")
     comment = Comment.create!(
-      user: @user,
+      user: @other_user,
       commentable: post,
       content: "Great post!"
     )
@@ -78,12 +80,12 @@ class ProfileNavigationTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Verify link to commenter's profile exists in comments
-    assert_select ".comment a[href=?]", user_path(@user), text: @user.name
+    assert_select ".comment a[href=?]", user_path(@other_user), text: @other_user.name
 
     # Navigate to commenter's profile
-    get user_path(@user)
+    get user_path(@other_user)
     assert_response :success
-    assert_select "h1", text: @user.name
+    assert_select "h1", text: @other_user.name
   end
 
   # Testing BEHAVIOR: User can navigate from profile back to posts feed
@@ -109,10 +111,11 @@ class ProfileNavigationTest < ActionDispatch::IntegrationTest
   test "navigates from profile post preview to full post" do
     sign_in @user
 
-    post = Post.create!(user: @other_user, content: "Tomato harvest")
+    # Create post by current user (since users can only view their own posts)
+    post = Post.create!(user: @user, content: "Tomato harvest")
 
     # Visit user profile
-    get user_path(@other_user)
+    get user_path(@user)
     assert_response :success
 
     # Verify link to full post exists
@@ -160,16 +163,16 @@ class ProfileNavigationTest < ActionDispatch::IntegrationTest
   test "complete navigation flow from feed through profile and back" do
     sign_in @user
 
-    # Create posts for context
-    post1 = Post.create!(user: @other_user, content: "First post")
-    post2 = Post.create!(user: @other_user, content: "Second post")
+    # Create posts by current user (since users can only view their own posts)
+    post1 = Post.create!(user: @user, content: "First post")
+    post2 = Post.create!(user: @user, content: "Second post")
 
     # Start at posts index
     get posts_path
     assert_response :success
 
     # Click on user name to go to profile
-    get user_path(@other_user)
+    get user_path(@user)
     assert_response :success
     assert_select ".user-posts", text: /First post/
     assert_select ".user-posts", text: /Second post/
@@ -190,9 +193,10 @@ class ProfileNavigationTest < ActionDispatch::IntegrationTest
   test "comment profile pictures link to commenter profiles" do
     sign_in @user
 
-    post = Post.create!(user: @other_user, content: "Garden update")
+    # Create post by current user (since users can only view their own posts)
+    post = Post.create!(user: @user, content: "Garden update")
     Comment.create!(
-      user: @user,
+      user: @other_user,
       commentable: post,
       content: "Nice garden!"
     )
@@ -202,7 +206,7 @@ class ProfileNavigationTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Verify profile picture link exists in comment
-    assert_select ".comment a[href=?]", user_path(@user) do
+    assert_select ".comment a[href=?]", user_path(@other_user) do
       assert_select "img.profile-picture-small"
     end
   end
