@@ -53,4 +53,11 @@ class User < ApplicationRecord
     sent_requests.pending.exists?(receiver_id: other_user.id) ||
       received_requests.pending.exists?(sender_id: other_user.id)
   end
+
+  # Returns the Gravatar URL for this user's profile picture
+  # Can be overridden later to support OmniAuth profile pictures
+  def profile_picture_url(size: 80)
+    gravatar_id = Digest::MD5.hexdigest(email.downcase.strip)
+    "https://www.gravatar.com/avatar/#{gravatar_id}?s=#{size}&d=identicon"
+  end
 end
