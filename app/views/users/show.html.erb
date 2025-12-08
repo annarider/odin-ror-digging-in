@@ -1,0 +1,62 @@
+<div class="user-profile">
+  <!-- Profile Header Section -->
+  <div class="profile-header">
+    <%= image_tag @user.profile_picture_url(size: 150), alt: "#{@user.name}'s profile picture", class: "profile-picture-large" %>
+
+    <div class="profile-info">
+      <h1><%= @user.name %></h1>
+      <p><%= @user.email %></p>
+      <p>Member since: <%= @user.created_at.strftime("%B %Y") %></p>
+    </div>
+  </div>
+
+  <!-- User Stats -->
+  <div class="profile-stats">
+    <div class="stat">
+      <strong><%= @user.posts.count %></strong>
+      <span><%= "post".pluralize(@user.posts.count) %></span>
+    </div>
+    <div class="stat">
+      <strong><%= @user.friends.count %></strong>
+      <span><%= "friend".pluralize(@user.friends.count) %></span>
+    </div>
+  </div>
+
+  <!-- User's Posts Section -->
+  <div class="user-posts">
+    <h2><%= @user.name %>'s Posts</h2>
+
+    <% if @posts.any? %>
+      <% @posts.each do |post| %>
+        <div class="post">
+          <div class="post-header">
+            <%= image_tag @user.profile_picture_url(size: 60), alt: "#{@user.name}'s profile picture", class: "profile-picture" %>
+            <div class="post-info">
+              <h3><%= @user.name %></h3>
+              <small><%= time_ago_in_words(post.created_at) %> ago</small>
+            </div>
+          </div>
+
+          <p><%= post.content %></p>
+
+          <% if post.image.present? %>
+            <%= image_tag post.image %>
+          <% end %>
+
+          <!-- Post Stats -->
+          <div class="post-stats">
+            <small>
+              <strong><%= post.likes.count %></strong> <%= "like".pluralize(post.likes.count) %>
+              &bull;
+              <strong><%= post.comments.count %></strong> <%= "comment".pluralize(post.comments.count) %>
+            </small>
+          </div>
+
+          <%= link_to "View Post", post_path(post), class: "view-post-link" %>
+        </div>
+      <% end %>
+    <% else %>
+      <p>No posts yet.</p>
+    <% end %>
+  </div>
+</div>
