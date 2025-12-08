@@ -7,8 +7,9 @@
       <div class="requests-list">
         <% @received_requests.each do |request| %>
           <div class="request-card">
+            <%= image_tag request.sender.profile_picture_url(size: 50), alt: "#{request.sender.name}'s profile picture", class: "profile-picture" %>
             <div class="request-info">
-              <strong><%= request.sender.email %></strong>
+              <strong><%= request.sender.name %></strong>
               <span class="request-date">Sent <%= time_ago_in_words(request.created_at) %> ago</span>
             </div>
             <div class="request-actions">
@@ -29,8 +30,9 @@
       <div class="requests-list">
         <% @sent_requests.each do |request| %>
           <div class="request-card">
+            <%= image_tag request.receiver.profile_picture_url(size: 50), alt: "#{request.receiver.name}'s profile picture", class: "profile-picture" %>
             <div class="request-info">
-              <strong><%= request.receiver.email %></strong>
+              <strong><%= request.receiver.name %></strong>
               <span class="request-date">Sent <%= time_ago_in_words(request.created_at) %> ago</span>
             </div>
             <div class="request-actions">
