@@ -15,17 +15,92 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_user_session_path
   end
 
-  # Index action tests
-  test "should get index" do
+  # Index action tests - Testing BEHAVIOR and OUTCOMES
+  test "should get index when authenticated" do
     get posts_url
     assert_response :success
   end
 
-  test "index should only show current user's posts" do
+  test "index shows current user's own posts" do
+    # Create a post for the current user
+    my_post = @user.posts.create!(content: "My gardening update about tomatoes")
+
     get posts_url
-    assert_response :success
-    # Check that the response includes the current user's post content
-    assert_select "body", text: /#{@post.content}/
+
+    # Verify OUTCOME: user can see their own post
+    assert_select "body", text: /tomatoes/
+  end
+
+  test "index shows friends' posts" do
+    # Setup: Create a friend and their post
+    friend = User.create!(name: "Friend Gardener", email: "friend@example.com", password: "password123")
+    friend_post = friend.posts.create!(content: "Friend's post about roses")
+
+    # Setup: Make them friends by creating accepted friend request
+    FriendRequest.create!(sender: @user, receiver: friend, status: "accepted")
+
+    get posts_url
+
+    # Verify OUTCOME: current user sees friend's post
+    assert_select "body", text: /roses/
+  end
+
+  test "index does not show non-friend posts" do
+    # Setup: Create a non-friend user and their post
+    stranger = User.create!(name: "Stranger", email: "stranger@example.com", password: "password123")
+    stranger_post = stranger.posts.create!(content: "Stranger's post about cucumbers")
+
+    get posts_url
+
+    # Verify OUTCOME: current user does NOT see stranger's post
+    assert_select "body", text: /cucumbers/, count: 0
+  end
+
+  test "index does not show posts from pending friend requests" do
+    # Setup: Create user with pending friend request
+    pending_friend = User.create!(name: "Pending Friend", email: "pending@example.com", password: "password123")
+    pending_post = pending_friend.posts.create!(content: "Pending friend's post about peppers")
+
+    # Create pending (not accepted) friend request
+    FriendRequest.create!(sender: @user, receiver: pending_friend, status: "pending")
+
+    get posts_url
+
+    # Verify OUTCOME: posts from pending friends are NOT shown
+    assert_select "body", text: /peppers/, count: 0
+  end
+
+  test "index shows posts ordered by most recent first" do
+    # Setup: Create posts at different times
+    old_post = @user.posts.create!(content: "Old post about carrots", created_at: 2.days.ago)
+    new_post = @user.posts.create!(content: "New post about lettuce", created_at: 1.hour.ago)
+
+    get posts_url
+
+    # Verify OUTCOME: posts are ordered by recency
+    response_body = response.body
+    lettuce_position = response_body.index("lettuce")
+    carrots_position = response_body.index("carrots")
+
+    assert lettuce_position < carrots_position, "Newer post should appear before older post"
+  end
+
+  test "index assigns correct posts to @posts instance variable" do
+    # Setup: Create friend
+    friend = User.create!(name: "Alice", email: "alice@example.com", password: "password123")
+    FriendRequest.create!(sender: @user, receiver: friend, status: "accepted")
+
+    # Create posts
+    my_post = @user.posts.create!(content: "My content")
+    friend_post = friend.posts.create!(content: "Friend content")
+
+    get posts_url
+
+    # Verify OUTCOME: @posts contains the right posts
+    posts_in_response = assigns(:posts)
+    assert_includes posts_in_response, my_post
+    assert_includes posts_in_response, friend_post
+    assert_equal 3, posts_in_response.count # my_post + friend_post + fixture post
   end
 
   # Show action tests
