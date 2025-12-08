@@ -5,7 +5,10 @@
 <div class="posts">
   <% @posts.each do |post| %>
     <div class="post">
-      <h2><%= link_to "Post by #{post.user.name}", post_path(post) %></h2>
+      <div class="post-header">
+        <%= image_tag post.user.profile_picture_url(size: 50), alt: "#{post.user.name}'s profile picture", class: "profile-picture" %>
+        <h2><%= link_to post.user.name, post_path(post) %></h2>
+      </div>
 
       <p><%= post.content %></p>
 
