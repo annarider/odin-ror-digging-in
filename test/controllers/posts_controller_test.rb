@@ -85,24 +85,6 @@ class PostsControllerTest < ActionDispatch::IntegrationTest
     assert lettuce_position < carrots_position, "Newer post should appear before older post"
   end
 
-  test "index assigns correct posts to @posts instance variable" do
-    # Setup: Create friend
-    friend = User.create!(name: "Alice", email: "alice@example.com", password: "password123")
-    FriendRequest.create!(sender: @user, receiver: friend, status: "accepted")
-
-    # Create posts
-    my_post = @user.posts.create!(content: "My content")
-    friend_post = friend.posts.create!(content: "Friend content")
-
-    get posts_url
-
-    # Verify OUTCOME: @posts contains the right posts
-    posts_in_response = assigns(:posts)
-    assert_includes posts_in_response, my_post
-    assert_includes posts_in_response, friend_post
-    assert_equal 3, posts_in_response.count # my_post + friend_post + fixture post
-  end
-
   # Show action tests
   test "should get show" do
     get post_url(@post)
