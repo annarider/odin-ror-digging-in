@@ -1,7 +1,9 @@
 <div class="post">
   <div class="post-header">
-    <%= image_tag @post.user.profile_picture_url(size: 60), alt: "#{@post.user.name}'s profile picture", class: "profile-picture" %>
-    <h2><%= @post.user.name %></h2>
+    <%= link_to user_path(@post.user) do %>
+      <%= image_tag @post.user.profile_picture_url(size: 60), alt: "#{@post.user.name}'s profile picture", class: "profile-picture" %>
+    <% end %>
+    <h2><%= link_to @post.user.name, user_path(@post.user) %></h2>
   </div>
 
   <p><%= @post.content %></p>
@@ -36,10 +38,12 @@
     <% @post.comments.select(&:persisted?).each do |comment| %>
       <div class="comment">
         <div class="comment-header">
-          <%= image_tag comment.user.profile_picture_url(size: 40), alt: "#{comment.user.name}'s profile picture", class: "profile-picture-small" %>
+          <%= link_to user_path(comment.user) do %>
+            <%= image_tag comment.user.profile_picture_url(size: 40), alt: "#{comment.user.name}'s profile picture", class: "profile-picture-small" %>
+          <% end %>
           <div class="comment-info">
             <p>
-              <strong><%= comment.user.name %></strong>
+              <strong><%= link_to comment.user.name, user_path(comment.user) %></strong>
               <small>- <%= time_ago_in_words(comment.created_at) %> ago</small>
             </p>
           </div>
