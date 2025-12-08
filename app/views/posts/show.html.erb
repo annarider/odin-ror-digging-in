@@ -30,7 +30,7 @@
   <div class="comments">
     <h3>Comments (<%= @post.comments.count %>)</h3>
 
-    <% @post.comments.each do |comment| %>
+    <% @post.comments.select(&:persisted?).each do |comment| %>
       <div class="comment">
         <p>
           <strong><%= comment.user.name %></strong>

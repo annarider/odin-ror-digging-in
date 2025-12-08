@@ -10,6 +10,8 @@ class CommentsController < ApplicationController
     if @comment.save
       redirect_to root_post, notice: "Comment posted."
     else
+      # Set @post for the view - find the root post from @commentable
+      @post = find_root_post(@commentable)
       render "posts/show", status: :unprocessable_entity
     end
   end
@@ -47,6 +49,14 @@ class CommentsController < ApplicationController
   def root_post
     commentable = @comment.commentable
     # Keep going up the chain until we hit a Post
+    while commentable.is_a?(Comment)
+      commentable = commentable.commentable
+    end
+    commentable # This will be the Post
+  end
+
+  # Find the root post from any commentable object
+  def find_root_post(commentable)
     while commentable.is_a?(Comment)
       commentable = commentable.commentable
     end
