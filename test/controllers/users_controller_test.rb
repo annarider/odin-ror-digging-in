@@ -31,7 +31,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     get user_path(@other_user)
     assert_response :success
     assert_select "h1", text: @other_user.name
-    assert_select "body", text: @other_user.email
+    assert_match @other_user.email, response.body
   end
 
   # Testing BEHAVIOR: Profile displays posts in chronological order
