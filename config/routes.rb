@@ -12,6 +12,7 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+  resources :users, only: [ :show ]
   resources :friend_requests, only: [ :index, :create, :update, :destroy ]
   resources :posts do
     resources :comments, only: [ :create ]
