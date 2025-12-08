@@ -125,4 +125,42 @@ class UserTest < ActiveSupport::TestCase
     # Assert
     assert_equal 0, FriendRequest.where(sender_id: alice.id).count
   end
+
+  test "profile_picture_url returns a valid URL" do
+    # Arrange
+    user = create_user(name: "Test User", email: "test@example.com")
+
+    # Act
+    url = user.profile_picture_url
+
+    # Assert - User should get a valid Gravatar URL they can display
+    assert url.start_with?("https://www.gravatar.com/avatar/")
+    assert url.include?("s=80") # has a size parameter
+  end
+
+  test "profile_picture_url returns different URLs for different users" do
+    # Arrange
+    alice = create_user(name: "Alice", email: "alice@example.com")
+    bob = create_user(name: "Bob", email: "bob@example.com")
+
+    # Act
+    alice_url = alice.profile_picture_url
+    bob_url = bob.profile_picture_url
+
+    # Assert - Each user should get their own unique profile picture
+    assert_not_equal alice_url, bob_url
+  end
+
+  test "profile_picture_url respects custom size" do
+    # Arrange
+    user = create_user(name: "Test User", email: "test@example.com")
+
+    # Act
+    small_url = user.profile_picture_url(size: 40)
+    large_url = user.profile_picture_url(size: 200)
+
+    # Assert - Different sizes should be reflected in the URL
+    assert small_url.include?("s=40")
+    assert large_url.include?("s=200")
+  end
 end
