@@ -10,8 +10,11 @@ class LikesControllerTest < ActionDispatch::IntegrationTest
 
   # Create action tests
   test "should create like on post" do
+    # Use post two which doesn't have a like from user one yet
+    unliked_post = posts(:two)
+
     assert_difference("Like.count", 1) do
-      post post_likes_path(@post)
+      post post_likes_path(unliked_post)
     end
     assert_redirected_to posts_path
     assert_equal "Successfully liked!", flash[:notice]
@@ -28,8 +31,7 @@ class LikesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should not create duplicate like on same post" do
-    @post.likes.create(user: @user)
-
+    # User one already has a like on post one from fixtures
     assert_no_difference("Like.count") do
       post post_likes_path(@post)
     end
@@ -39,7 +41,8 @@ class LikesControllerTest < ActionDispatch::IntegrationTest
 
   # Destroy action tests
   test "should destroy own like" do
-    like = @post.likes.create(user: @user)
+    # Use the like from fixtures
+    like = likes(:one)
 
     assert_difference("Like.count", -1) do
       delete like_path(like)
