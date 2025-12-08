@@ -28,8 +28,9 @@ class ProfilePicturesTest < ActionDispatch::IntegrationTest
   end
 
   test "user sees friend's profile picture on posts index page" do
-    # Setup: Friend creates a post
+    # Setup: Users are friends, friend creates a post
     sign_in @user
+    FriendRequest.create!(sender: @user, receiver: @friend, status: "accepted")
     friend_post = @friend.posts.create!(content: "Friend's post content")
 
     # Act: User visits posts index
@@ -74,8 +75,9 @@ class ProfilePicturesTest < ActionDispatch::IntegrationTest
   end
 
   test "multiple users show different profile pictures" do
-    # Setup: Both users create posts
+    # Setup: Users are friends, both create posts
     sign_in @user
+    FriendRequest.create!(sender: @user, receiver: @friend, status: "accepted")
     @user.posts.create!(content: "User one post")
     @friend.posts.create!(content: "User two post")
 

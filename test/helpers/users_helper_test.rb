@@ -1,6 +1,6 @@
 require "test_helper"
 
-class ApplicationHelperTest < ActionView::TestCase
+class UsersHelperTest < ActionView::TestCase
   test "gravatar_url returns a valid Gravatar URL" do
     # Arrange - use existing fixture
     user = users(:one)
