@@ -36,7 +36,7 @@ class User < ApplicationRecord
 
   # Get all friends (both directions)
   def friends
-    User.where(id: friends_id)
+    User.where(id: friends_ids)
   end
 
   # Get all friends' IDs
