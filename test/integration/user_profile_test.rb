@@ -101,8 +101,9 @@ class UserProfileTest < ActionDispatch::IntegrationTest
 
     post = Post.create!(user: @other_user, content: "Great gardening day")
 
-    # Create some engagement
-    2.times { Like.create!(user: @user, likeable: post) }
+    # Create some engagement (can't have duplicate likes from same user)
+    Like.create!(user: @user, likeable: post)
+    Like.create!(user: @other_user, likeable: post)
     3.times { |i| Comment.create!(user: @user, content: "Comment #{i}", commentable: post) }
 
     get user_path(@other_user)
