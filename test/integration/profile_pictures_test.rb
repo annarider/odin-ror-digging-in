@@ -21,7 +21,7 @@ class ProfilePicturesTest < ActionDispatch::IntegrationTest
 
     # Assert: User sees their profile picture displayed
     assert_response :success
-    assert_select "img.profile-picture[alt='#{@user.name}'s profile picture']"
+    assert_select "img.profile-picture[alt=?]", "#{@user.name}'s profile picture"
     # Verify the image src contains gravatar URL with user's email hash
     gravatar_id = Digest::MD5.hexdigest(@user.email.downcase.strip)
     assert_select "img[src*='gravatar.com/avatar/#{gravatar_id}']"
@@ -37,7 +37,7 @@ class ProfilePicturesTest < ActionDispatch::IntegrationTest
 
     # Assert: User sees friend's profile picture
     assert_response :success
-    assert_select "img.profile-picture[alt='#{@friend.name}'s profile picture']"
+    assert_select "img.profile-picture[alt=?]", "#{@friend.name}'s profile picture"
     gravatar_id = Digest::MD5.hexdigest(@friend.email.downcase.strip)
     assert_select "img[src*='gravatar.com/avatar/#{gravatar_id}']"
   end
@@ -52,7 +52,7 @@ class ProfilePicturesTest < ActionDispatch::IntegrationTest
 
     # Assert: Profile picture is displayed on the post
     assert_response :success
-    assert_select "img.profile-picture[alt='#{@user.name}'s profile picture']"
+    assert_select "img.profile-picture[alt=?]", "#{@user.name}'s profile picture"
     gravatar_id = Digest::MD5.hexdigest(@user.email.downcase.strip)
     assert_select "img[src*='gravatar.com/avatar/#{gravatar_id}']"
   end
@@ -68,7 +68,7 @@ class ProfilePicturesTest < ActionDispatch::IntegrationTest
 
     # Assert: Friend's profile picture appears next to their comment
     assert_response :success
-    assert_select "img.profile-picture-small[alt='#{@friend.name}'s profile picture']"
+    assert_select "img.profile-picture-small[alt=?]", "#{@friend.name}'s profile picture"
     gravatar_id = Digest::MD5.hexdigest(@friend.email.downcase.strip)
     assert_select "img[src*='gravatar.com/avatar/#{gravatar_id}']"
   end
@@ -106,7 +106,7 @@ class ProfilePicturesTest < ActionDispatch::IntegrationTest
 
     # Assert: Profile picture has descriptive alt text
     assert_response :success
-    assert_select "img.profile-picture[alt='#{@user.name}'s profile picture']"
+    assert_select "img.profile-picture[alt=?]", "#{@user.name}'s profile picture"
   end
 
   test "user sees sender profile picture on received friend requests" do
@@ -119,7 +119,7 @@ class ProfilePicturesTest < ActionDispatch::IntegrationTest
 
     # Assert: Sender's profile picture is displayed
     assert_response :success
-    assert_select "img.profile-picture[alt='#{@friend.name}'s profile picture']"
+    assert_select "img.profile-picture[alt=?]", "#{@friend.name}'s profile picture"
     gravatar_id = Digest::MD5.hexdigest(@friend.email.downcase.strip)
     assert_select "img[src*='gravatar.com/avatar/#{gravatar_id}']"
   end
@@ -134,7 +134,7 @@ class ProfilePicturesTest < ActionDispatch::IntegrationTest
 
     # Assert: Receiver's profile picture is displayed
     assert_response :success
-    assert_select "img.profile-picture[alt='#{@friend.name}'s profile picture']"
+    assert_select "img.profile-picture[alt=?]", "#{@friend.name}'s profile picture"
     gravatar_id = Digest::MD5.hexdigest(@friend.email.downcase.strip)
     assert_select "img[src*='gravatar.com/avatar/#{gravatar_id}']"
   end
