@@ -143,6 +143,45 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select "button[type='submit']", text: "Add Friend", count: 1
   end
 
+  # Testing BEHAVIOR: Friend relationship is bidirectional
+  # Testing OUTCOME: Shows "Friends" regardless of who sent the original request
+  test "shows friends badge when OTHER user sent the accepted friend request" do
+    sign_in @user
+
+    # Other user sent request and it was accepted
+    FriendRequest.create!(
+      sender: @other_user,
+      receiver: @user,
+      status: "accepted"
+    )
+
+    get users_path
+    assert_response :success
+
+    # Should show "Friends" badge (bidirectional friendship)
+    assert_select ".badge.friend-badge", text: "Friends"
+  end
+
+  # Testing BEHAVIOR: Rejected requests don't affect button display
+  # Testing OUTCOME: Shows "Add Friend" button even if previous request was rejected
+  test "shows add friend button when previous request was rejected" do
+    sign_in @user
+
+    # Create a rejected friend request
+    FriendRequest.create!(
+      sender: @user,
+      receiver: @other_user,
+      status: "rejected"
+    )
+
+    get users_path
+    assert_response :success
+
+    # Should show "Add Friend" button (rejected requests don't count as pending)
+    # We have two other users, so should see 2 "Add Friend" buttons
+    assert_select "button[type='submit']", text: "Add Friend", count: 2
+  end
+
   # Testing BEHAVIOR: Shows "Request Pending" for pending requests
   # Testing OUTCOME: Badge appears for users with pending requests
   test "shows request pending badge when friend request is pending" do
