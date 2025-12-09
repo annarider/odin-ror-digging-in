@@ -4,6 +4,9 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  # Callbacks
+  after_create :send_welcome_email
+
   # Posts association
   has_many :posts, dependent: :destroy
 
@@ -59,5 +62,12 @@ class User < ApplicationRecord
   def profile_picture_url(size: 80)
     gravatar_id = Digest::MD5.hexdigest(email.downcase.strip)
     "https://www.gravatar.com/avatar/#{gravatar_id}?s=#{size}&d=identicon"
+  end
+
+  private
+
+  # Sends a welcome email to the user after account creation
+  def send_welcome_email
+    UserMailer.welcome_email(self).deliver_later
   end
 end
