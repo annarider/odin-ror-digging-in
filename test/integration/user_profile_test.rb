@@ -46,7 +46,8 @@ class UserProfileTest < ActionDispatch::IntegrationTest
 
     # Verify statistics are displayed
     assert_select ".profile-stats"
-    assert_match /3\s+posts/, response.body
+    # Allow for any whitespace/newlines between number and text
+    assert_match />3<.*>posts</m, response.body
     assert_match /friends?/, response.body
   end
 

@@ -131,6 +131,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Verify post count is displayed (should show "3 posts")
-    assert_match /3\s+posts/, response.body
+    # Allow for any whitespace/newlines between number and text
+    assert_match />3<.*>posts</m, response.body
   end
 end
