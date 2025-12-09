@@ -1,35 +1,110 @@
 require "test_helper"
 
 class UserMailerTest < ActionMailer::TestCase
-  test "welcome_email sends to correct user with correct subject" do
-    # Create a test user
+  # UNIT TESTS - Testing UserMailer behavior
+  # Following Sandi Metz principles:
+  # - Test OUTCOMES (what the email contains), not implementation
+  # - Test from USER'S perspective (what would the recipient see?)
+  # - Use REAL objects (User) instead of mocks/stubs
+  # - Focus on STATE (the email object) and RETURN VALUES
+
+  test "welcome_email creates an email with correct recipients and subject" do
+    # Arrange: Create a real user object (not a stub - User is not expensive)
     user = User.new(
       name: "Test Gardener",
       email: "test@example.com",
       password: "password123"
     )
 
-    # Generate the welcome email
+    # Act: Generate the email
     mail = UserMailer.welcome_email(user)
 
-    # Test the email headers
+    # Assert: Test the OUTCOME - what the email object contains
     assert_equal "Welcome to GardenBook!", mail.subject
     assert_equal [ "test@example.com" ], mail.to
     assert_equal [ "from@example.com" ], mail.from
   end
 
-  test "welcome_email includes user name and relevant content" do
+  test "welcome_email personalizes greeting with user's name" do
+    # Arrange: User with a specific name
     user = User.new(
       name: "Jane Doe",
       email: "jane@example.com",
       password: "password123"
     )
 
+    # Act: Generate the email
     mail = UserMailer.welcome_email(user)
 
-    # Test the email body contains personalized content
+    # Assert: Test OUTCOME - the email body contains personalized greeting
+    # This is what the USER will see, so it's the important behavior to test
     assert_match "Welcome to GardenBook, Jane Doe!", mail.body.encoded
+  end
+
+  test "welcome_email contains key information about the platform" do
+    # Arrange
+    user = User.new(
+      name: "Bob Smith",
+      email: "bob@example.com",
+      password: "password123"
+    )
+
+    # Act
+    mail = UserMailer.welcome_email(user)
+
+    # Assert: Test OUTCOME - email explains what GardenBook is for
+    # From user's perspective: "What is this site I signed up for?"
     assert_match "gardening enthusiasts", mail.body.encoded
+    assert_match "Share your gardening journey", mail.body.encoded
+    assert_match "Connect with fellow gardeners", mail.body.encoded
+  end
+
+  test "welcome_email includes a link to visit the site" do
+    # Arrange
+    user = User.new(
+      name: "Alice Green",
+      email: "alice@example.com",
+      password: "password123"
+    )
+
+    # Act
+    mail = UserMailer.welcome_email(user)
+
+    # Assert: Test OUTCOME - user can click to visit the site
+    # From user's perspective: "How do I get back to the site?"
     assert_match "Visit GardenBook", mail.body.encoded
+    assert_match root_url, mail.body.encoded
+  end
+
+  test "welcome_email renders as HTML" do
+    # Arrange
+    user = User.new(
+      name: "Charlie Brown",
+      email: "charlie@example.com",
+      password: "password123"
+    )
+
+    # Act
+    mail = UserMailer.welcome_email(user)
+
+    # Assert: Test OUTCOME - email is properly formatted as HTML
+    assert_equal "text/html", mail.content_type.split(";").first
+    assert_match "<html>", mail.body.encoded
+  end
+
+  test "welcome_email works with different user names" do
+    # Arrange: Test with a name that has special characters
+    user = User.new(
+      name: "María José O'Connor",
+      email: "maria@example.com",
+      password: "password123"
+    )
+
+    # Act
+    mail = UserMailer.welcome_email(user)
+
+    # Assert: Test OUTCOME - names with special chars are handled correctly
+    assert_match "María José O'Connor", mail.body.encoded
+    assert_equal [ "maria@example.com" ], mail.to
   end
 end
