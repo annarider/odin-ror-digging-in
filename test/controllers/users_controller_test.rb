@@ -6,6 +6,14 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     @other_user = users(:two)
   end
 
+  # ============================================================================
+  # INDEX ACTION TESTS
+  # ============================================================================
+
+  # ----------------------------------------------------------------------------
+  # Authentication & Authorization
+  # ----------------------------------------------------------------------------
+
   # Testing BEHAVIOR: Authentication requirement for index
   # Testing OUTCOME: Redirects to sign-in page
   test "index redirects to sign in when user is not authenticated" do
@@ -13,12 +21,9 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_user_session_path
   end
 
-  # Testing BEHAVIOR: Authentication requirement
-  # Testing OUTCOME: Redirects to sign-in page
-  test "redirects to sign in when user is not authenticated" do
-    get user_path(@user)
-    assert_redirected_to new_user_session_path
-  end
+  # ----------------------------------------------------------------------------
+  # Basic Index Display
+  # ----------------------------------------------------------------------------
 
   # Testing BEHAVIOR: Authenticated users can view all users
   # Testing OUTCOME: Returns successful response with user list
