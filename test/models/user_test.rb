@@ -167,11 +167,8 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "welcome email is sent after user creation" do
-    # Arrange - Clear any previously enqueued emails
-    ActionMailer::Base.deliveries.clear
-
-    # Act - Create a new user
-    assert_enqueued_emails 1 do
+    # Act & Assert - Creating a user should enqueue a welcome email job
+    assert_enqueued_jobs 1, only: ActionMailer::MailDeliveryJob do
       create_user(name: "New User", email: "newuser@example.com")
     end
   end
