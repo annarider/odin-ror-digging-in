@@ -33,7 +33,7 @@ class CommentsController < ApplicationController
 
   def set_comment
     @comment = current_user.comments.find(params[:id])
-  end
+  endx``
 
   def find_commentable
     # Check params to find what user is commenting on

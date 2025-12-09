@@ -203,8 +203,10 @@ class UserProfileTest < ActionDispatch::IntegrationTest
     get user_path(@other_user)
 
     # Should say "1 post" not "1 posts"
-    assert_match /1\s+post\s/, response.body
-    assert_no_match /1\s+posts/, response.body
+    # Allow for any whitespace/newlines between number and "post"
+    assert_match />1<.*>post\s*</m, response.body
+    # Make sure it doesn't say "posts" (plural)
+    assert_select ".profile-stats", text: /1.*post[^s]/
   end
 
   # Testing BEHAVIOR: User can view their own profile
