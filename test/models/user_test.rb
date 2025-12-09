@@ -1,6 +1,8 @@
 require "test_helper"
 
 class UserTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+
   # Helper to create users quickly
   def create_user(name:, email:)
     User.create!(
