@@ -271,6 +271,10 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_match @other_user.email, response.body
   end
 
+  # ----------------------------------------------------------------------------
+  # Posts Display & Ordering
+  # ----------------------------------------------------------------------------
+
   # Testing BEHAVIOR: Profile displays posts in chronological order
   # Testing OUTCOME: Posts appear newest first on the page
   test "displays user's posts ordered by most recent first" do
@@ -324,6 +328,29 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     # Should NOT show different user's post
     assert_select "body", text: /DIFFERENT USER POST/, count: 0
   end
+
+  # Testing BEHAVIOR: Profile shows correct post count
+  # Testing OUTCOME: Post count matches number of user's posts
+  test "displays correct number of user posts" do
+    sign_in @user
+
+    # Delete existing fixtures to have clean count
+    @other_user.posts.destroy_all
+
+    # Create specific number of posts
+    3.times { |i| Post.create!(user: @other_user, content: "Post #{i}") }
+
+    get user_path(@other_user)
+    assert_response :success
+
+    # Verify post count is displayed (should show "3 posts")
+    # Allow for any whitespace/newlines between number and text
+    assert_match />3<.*>posts</m, response.body
+  end
+
+  # ----------------------------------------------------------------------------
+  # Edge Cases & Error Handling
+  # ----------------------------------------------------------------------------
 
   # Testing BEHAVIOR: Handles non-existent user gracefully
   # Testing OUTCOME: Returns 404 status (caught by Rails rescue_from)
