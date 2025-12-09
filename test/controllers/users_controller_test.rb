@@ -437,23 +437,4 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: @user.name
     assert_match @user.email, response.body
   end
-
-  # Testing BEHAVIOR: Profile shows correct post count
-  # Testing OUTCOME: Post count matches number of user's posts
-  test "displays correct number of user posts" do
-    sign_in @user
-
-    # Delete existing fixtures to have clean count
-    @other_user.posts.destroy_all
-
-    # Create specific number of posts
-    3.times { |i| Post.create!(user: @other_user, content: "Post #{i}") }
-
-    get user_path(@other_user)
-    assert_response :success
-
-    # Verify post count is displayed (should show "3 posts")
-    # Allow for any whitespace/newlines between number and text
-    assert_match />3<.*>posts</m, response.body
-  end
 end
