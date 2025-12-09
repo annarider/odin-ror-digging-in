@@ -260,6 +260,64 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select "button[type='submit']", text: "Add Friend", count: 0
   end
 
+  # ----------------------------------------------------------------------------
+  # User Interface Elements
+  # ----------------------------------------------------------------------------
+
+  # Testing BEHAVIOR: User cards contain profile pictures
+  # Testing OUTCOME: Each user card has a profile image
+  test "index displays profile pictures for each user" do
+    sign_in @user
+
+    get users_path
+    assert_response :success
+
+    # Should have profile picture images for each user shown
+    # We exclude current_user, so should have 2 images
+    assert_select ".user-card img.profile-picture", count: 2
+  end
+
+  # Testing BEHAVIOR: User names are clickable links to profiles
+  # Testing OUTCOME: Each user card has a link to the user's profile
+  test "index displays clickable links to user profiles" do
+    sign_in @user
+
+    get users_path
+    assert_response :success
+
+    # Should have links to other users' profiles
+    assert_select "a[href='#{user_path(@other_user)}']", text: @other_user.name
+  end
+
+  # ============================================================================
+  # SHOW ACTION TESTS
+  # ============================================================================
+
+  # ----------------------------------------------------------------------------
+  # Authentication & Authorization
+  # ----------------------------------------------------------------------------
+
+  # Testing BEHAVIOR: Authentication requirement
+  # Testing OUTCOME: Redirects to sign-in page
+  test "show redirects to sign in when user is not authenticated" do
+    get user_path(@user)
+    assert_redirected_to new_user_session_path
+  end
+
+  # ----------------------------------------------------------------------------
+  # Basic Profile Display
+  # ----------------------------------------------------------------------------
+
+  # Testing BEHAVIOR: Authenticated users can view profiles
+  # Testing OUTCOME: Returns successful response with correct user info displayed
+  test "shows user profile when authenticated" do
+    sign_in @user
+
+    get user_path(@other_user)
+    assert_response :success
+    assert_select "h1", text: @other_user.name
+  end
+
   # Testing BEHAVIOR: Profile displays user information
   # Testing OUTCOME: User name and email are visible on page
   test "displays the requested user information on the page" do
