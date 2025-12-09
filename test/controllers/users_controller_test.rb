@@ -51,6 +51,61 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select ".user-card .user-info h3", text: @user.name, count: 0
   end
 
+  # Testing BEHAVIOR: Index displays multiple users
+  # Testing OUTCOME: All users except current user are displayed
+  test "index displays all users except current user when multiple users exist" do
+    sign_in @user
+    third_user = users(:three)
+
+    get users_path
+    assert_response :success
+
+    # Should show both other users
+    assert_select ".user-card", count: 2
+    assert_match @other_user.name, response.body
+    assert_match third_user.name, response.body
+
+    # Should not show current user in user cards
+    assert_select ".user-card .user-info h3", text: @user.name, count: 0
+  end
+
+  # Testing BEHAVIOR: Index handles case where current user is only user
+  # Testing OUTCOME: Empty list is displayed gracefully
+  test "index shows empty state when current user is the only user" do
+    sign_in @user
+
+    # Delete all other users
+    User.where.not(id: @user.id).destroy_all
+
+    get users_path
+    assert_response :success
+
+    # Should have no user cards
+    assert_select ".user-card", count: 0
+  end
+
+  # Testing BEHAVIOR: Index displays users in alphabetical order by name
+  # Testing OUTCOME: Users appear sorted by name
+  test "index displays users in alphabetical order" do
+    sign_in @user
+    third_user = users(:three)
+
+    get users_path
+    assert_response :success
+
+    # Extract positions of names in response body
+    body = response.body
+    deux_position = body.index(@other_user.name)  # "Deux"
+    san_position = body.index(third_user.name)     # "San"
+
+    # "Deux" should appear before "San" alphabetically
+    assert deux_position < san_position, "Users should be ordered alphabetically"
+  end
+
+  # ----------------------------------------------------------------------------
+  # Friend Relationship Status Display
+  # ----------------------------------------------------------------------------
+
   # Testing BEHAVIOR: Shows "Add Friend" button for non-friends
   # Testing OUTCOME: Button appears for users who aren't friends
   test "shows add friend button for users who are not friends" do
@@ -111,14 +166,59 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select "button[type='submit']", text: "Add Friend", count: 1
   end
 
-  # Testing BEHAVIOR: Authenticated users can view profiles
-  # Testing OUTCOME: Returns successful response with correct user info displayed
-  test "shows user profile when authenticated" do
+  # Testing BEHAVIOR: Detects pending requests in both directions
+  # Testing OUTCOME: Shows "Request Pending" for received requests too
+  test "shows request pending badge when OTHER user sent request to current user" do
     sign_in @user
 
-    get user_path(@other_user)
+    # Other user sends request to current user (opposite direction)
+    FriendRequest.create!(
+      sender: @other_user,
+      receiver: @user,
+      status: "pending"
+    )
+
+    get users_path
     assert_response :success
-    assert_select "h1", text: @other_user.name
+
+    # Should show "Request Pending" badge (bidirectional check)
+    assert_select ".badge.pending-badge", text: "Request Pending"
+
+    # Should NOT show "Add Friend" button for this user
+    assert_select "button[type='submit']", text: "Add Friend", count: 1
+  end
+
+  # Testing BEHAVIOR: Each user shows correct relationship status
+  # Testing OUTCOME: Different buttons/badges for different relationship states
+  test "index shows correct status for each user based on relationship" do
+    sign_in @user
+    third_user = users(:three)
+
+    # Make @other_user a friend
+    FriendRequest.create!(
+      sender: @user,
+      receiver: @other_user,
+      status: "accepted"
+    )
+
+    # Send pending request to third_user
+    FriendRequest.create!(
+      sender: @user,
+      receiver: third_user,
+      status: "pending"
+    )
+
+    get users_path
+    assert_response :success
+
+    # Should show "Friends" badge for @other_user
+    assert_select ".badge.friend-badge", text: "Friends", count: 1
+
+    # Should show "Request Pending" badge for third_user
+    assert_select ".badge.pending-badge", text: "Request Pending", count: 1
+
+    # Should show NO "Add Friend" buttons (all relationships established)
+    assert_select "button[type='submit']", text: "Add Friend", count: 0
   end
 
   # Testing BEHAVIOR: Profile displays user information
