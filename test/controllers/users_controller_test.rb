@@ -113,7 +113,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     get user_path(@user)
     assert_response :success
     assert_select "h1", text: @user.name
-    assert_select "body", text: @user.email
+    assert_match @user.email, response.body
   end
 
   # Testing BEHAVIOR: Profile shows correct post count
@@ -121,14 +121,16 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
   test "displays correct number of user posts" do
     sign_in @user
 
+    # Delete existing fixtures to have clean count
+    @other_user.posts.destroy_all
+
     # Create specific number of posts
     3.times { |i| Post.create!(user: @other_user, content: "Post #{i}") }
 
     get user_path(@other_user)
     assert_response :success
 
-    # Verify post count is displayed
-    assert_select ".profile-stats", text: /3/
-    assert_select "body", text: /posts?/
+    # Verify post count is displayed (should show "3 posts")
+    assert_match /3\s+posts/, response.body
   end
 end
