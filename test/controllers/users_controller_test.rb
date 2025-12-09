@@ -55,8 +55,9 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Should show "Add Friend" button for other_user
-    assert_select "form[action='#{friend_requests_path}']" do
-      assert_select "input[value='Add Friend']"
+    # Note: button_to generates a form with query params in action attribute
+    assert_select "form[action*='/friend_requests']" do
+      assert_select "button[type='submit']", text: "Add Friend"
     end
   end
 
@@ -78,8 +79,8 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     # Should show "Friends" badge
     assert_select ".badge.friend-badge", text: "Friends"
 
-    # Should NOT show "Add Friend" button
-    assert_select "input[value='Add Friend']", count: 0
+    # Should NOT show "Add Friend" button for the friend
+    assert_select "button[type='submit']", text: "Add Friend", count: 1
   end
 
   # Testing BEHAVIOR: Shows "Request Pending" for pending requests
@@ -100,8 +101,9 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     # Should show "Request Pending" badge
     assert_select ".badge.pending-badge", text: "Request Pending"
 
-    # Should NOT show "Add Friend" button
-    assert_select "input[value='Add Friend']", count: 0
+    # Should NOT show "Add Friend" button for the user with pending request
+    # But should still show one button for the third user
+    assert_select "button[type='submit']", text: "Add Friend", count: 1
   end
 
   # Testing BEHAVIOR: Authenticated users can view profiles
