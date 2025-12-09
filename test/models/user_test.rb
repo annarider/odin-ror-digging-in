@@ -163,4 +163,14 @@ class UserTest < ActiveSupport::TestCase
     assert small_url.include?("s=40")
     assert large_url.include?("s=200")
   end
+
+  test "welcome email is sent after user creation" do
+    # Arrange - Clear any previously enqueued emails
+    ActionMailer::Base.deliveries.clear
+
+    # Act - Create a new user
+    assert_enqueued_emails 1 do
+      create_user(name: "New User", email: "newuser@example.com")
+    end
+  end
 end
