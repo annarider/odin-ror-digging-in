@@ -16,8 +16,8 @@ class UserProfileTest < ActionDispatch::IntegrationTest
 
     # Verify user information is displayed
     assert_select "h1", text: @other_user.name
-    assert_select "body", text: @other_user.email
-    assert_select "body", text: /Member since/
+    assert_match @other_user.email, response.body
+    assert_match /Member since/, response.body
   end
 
   # Testing BEHAVIOR: Profile page shows profile picture
@@ -36,6 +36,9 @@ class UserProfileTest < ActionDispatch::IntegrationTest
   test "displays user statistics" do
     sign_in @user
 
+    # Delete existing fixtures to have clean count
+    @other_user.posts.destroy_all
+
     # Create some posts for the user
     3.times { |i| Post.create!(user: @other_user, content: "Post #{i}") }
 
@@ -43,9 +46,8 @@ class UserProfileTest < ActionDispatch::IntegrationTest
 
     # Verify statistics are displayed
     assert_select ".profile-stats"
-    assert_select "body", text: /3/  # post count
-    assert_select "body", text: /posts?/
-    assert_select "body", text: /friends?/
+    assert_match /3\s+posts/, response.body
+    assert_match /friends?/, response.body
   end
 
   # Testing BEHAVIOR: Profile page lists user's posts
@@ -193,13 +195,15 @@ class UserProfileTest < ActionDispatch::IntegrationTest
   test "uses correct pluralization for statistics" do
     sign_in @user
 
-    # User with exactly 1 post
+    # Delete existing fixtures and create exactly 1 post
+    @other_user.posts.destroy_all
     Post.create!(user: @other_user, content: "Only one post")
 
     get user_path(@other_user)
 
     # Should say "1 post" not "1 posts"
-    assert_select ".profile-stats", text: /1.*post[^s]/
+    assert_match /1\s+post\s/, response.body
+    assert_no_match /1\s+posts/, response.body
   end
 
   # Testing BEHAVIOR: User can view their own profile
