@@ -1,0 +1,29 @@
+<div class="container">
+  <h1>All Gardeners</h1>
+
+  <div class="users-list">
+    <% @users.each do |user| %>
+      <div class="user-card">
+        <%= image_tag user.profile_picture_url(size: 60), alt: "#{user.name}'s profile picture", class: "profile-picture" %>
+
+        <div class="user-info">
+          <h3><%= link_to user.name, user_path(user) %></h3>
+          <p><%= user.email %></p>
+        </div>
+
+        <div class="user-actions">
+          <% if current_user.friend?(user) %>
+            <!-- Already friends - show a badge/status -->
+            <span class="badge friend-badge">Friends</span>
+          <% elsif current_user.friend_request_pending?(user) %>
+            <!-- Pending friend request - show pending status -->
+            <span class="badge pending-badge">Request Pending</span>
+          <% else %>
+            <!-- Not friends and no pending request - show "Add Friend" button -->
+            <%= button_to "Add Friend", friend_requests_path(receiver_id: user.id), method: :post, class: "btn btn-primary" %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
