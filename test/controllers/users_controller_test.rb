@@ -6,11 +6,102 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     @other_user = users(:two)
   end
 
+  # Testing BEHAVIOR: Authentication requirement for index
+  # Testing OUTCOME: Redirects to sign-in page
+  test "index redirects to sign in when user is not authenticated" do
+    get users_path
+    assert_redirected_to new_user_session_path
+  end
+
   # Testing BEHAVIOR: Authentication requirement
   # Testing OUTCOME: Redirects to sign-in page
   test "redirects to sign in when user is not authenticated" do
     get user_path(@user)
     assert_redirected_to new_user_session_path
+  end
+
+  # Testing BEHAVIOR: Authenticated users can view all users
+  # Testing OUTCOME: Returns successful response with user list
+  test "shows users index when authenticated" do
+    sign_in @user
+
+    get users_path
+    assert_response :success
+    assert_select "h1", text: "All Gardeners"
+  end
+
+  # Testing BEHAVIOR: Index page excludes current user
+  # Testing OUTCOME: Current user should not appear in the list
+  test "index does not display current user in the list" do
+    sign_in @user
+
+    get users_path
+    assert_response :success
+
+    # Should show other user
+    assert_match @other_user.name, response.body
+
+    # Should NOT show current user in the list
+    # (current user's name might appear in nav/header, so we check for the user card structure)
+    assert_select ".user-card .user-info h3", text: @user.name, count: 0
+  end
+
+  # Testing BEHAVIOR: Shows "Add Friend" button for non-friends
+  # Testing OUTCOME: Button appears for users who aren't friends
+  test "shows add friend button for users who are not friends" do
+    sign_in @user
+
+    get users_path
+    assert_response :success
+
+    # Should show "Add Friend" button for other_user
+    assert_select "form[action='#{friend_requests_path}']" do
+      assert_select "input[value='Add Friend']"
+    end
+  end
+
+  # Testing BEHAVIOR: Shows "Friends" badge for existing friends
+  # Testing OUTCOME: Badge appears instead of button for friends
+  test "shows friends badge for existing friends" do
+    sign_in @user
+
+    # Create an accepted friend request
+    FriendRequest.create!(
+      sender: @user,
+      receiver: @other_user,
+      status: "accepted"
+    )
+
+    get users_path
+    assert_response :success
+
+    # Should show "Friends" badge
+    assert_select ".badge.friend-badge", text: "Friends"
+
+    # Should NOT show "Add Friend" button
+    assert_select "input[value='Add Friend']", count: 0
+  end
+
+  # Testing BEHAVIOR: Shows "Request Pending" for pending requests
+  # Testing OUTCOME: Badge appears for users with pending requests
+  test "shows request pending badge when friend request is pending" do
+    sign_in @user
+
+    # Create a pending friend request
+    FriendRequest.create!(
+      sender: @user,
+      receiver: @other_user,
+      status: "pending"
+    )
+
+    get users_path
+    assert_response :success
+
+    # Should show "Request Pending" badge
+    assert_select ".badge.pending-badge", text: "Request Pending"
+
+    # Should NOT show "Add Friend" button
+    assert_select "input[value='Add Friend']", count: 0
   end
 
   # Testing BEHAVIOR: Authenticated users can view profiles
