@@ -1,46 +1,86 @@
-<h1>Post Updates</h1>
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <%# Header with Create Post Button %>
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl font-bold text-midnight-soil">Garden Feed 🌻</h1>
+    <%= link_to new_post_path, class: "btn btn-primary" do %>
+      <span class="text-lg">+ Share Update</span>
+    <% end %>
+  </div>
 
-<%= link_to "Create New Post", new_post_path %>
+  <%# Posts Feed %>
+  <div class="space-y-6">
+    <% @posts.each do |post| %>
+      <article class="card p-6 hover:shadow-lg transition-shadow">
+        <%# Post Header - Profile Picture & Name %>
+        <div class="flex items-center space-x-3 mb-4">
+          <%= link_to user_path(post.user), class: "flex-shrink-0" do %>
+            <%= image_tag post.user.profile_picture_url(size: 50),
+                alt: "#{post.user.name}'s profile picture",
+                class: "w-12 h-12 rounded-full border-2 border-living-moss" %>
+          <% end %>
+          <div class="flex-1">
+            <h2 class="font-semibold text-lg text-midnight-soil">
+              <%= link_to post.user.name, user_path(post.user), class: "hover:text-mineral-blue transition-colors" %>
+            </h2>
+            <p class="text-sm text-slate-mist">
+              Posted <%= time_ago_in_words(post.created_at) %> ago
+            </p>
+          </div>
+        </div>
 
-<div class="posts">
-  <% @posts.each do |post| %>
-    <div class="post">
-      <div class="post-header">
-        <%= link_to user_path(post.user) do %>
-          <%= image_tag post.user.profile_picture_url(size: 50), alt: "#{post.user.name}'s profile picture", class: "profile-picture" %>
+        <%# Post Content %>
+        <div class="mb-4">
+          <p class="text-midnight-soil leading-relaxed whitespace-pre-wrap"><%= post.content %></p>
+        </div>
+
+        <%# Post Image (if exists) %>
+        <% if post.image %>
+          <div class="mb-4 rounded-lg overflow-hidden">
+            <%= image_tag post.image, class: "w-full" %>
+          </div>
         <% end %>
-        <h2><%= link_to post.user.name, user_path(post.user) %></h2>
+
+        <%# Engagement Stats %>
+        <div class="flex items-center space-x-6 py-3 border-t border-b border-slate-mist/20 mb-4 text-sm text-slate-mist">
+          <span class="flex items-center space-x-1">
+            <span class="text-living-moss">❤️</span>
+            <strong class="text-midnight-soil"><%= post.likes.count %></strong>
+            <span><%= "like".pluralize(post.likes.count) %></span>
+          </span>
+          <span class="flex items-center space-x-1">
+            <span class="text-mineral-blue">💬</span>
+            <strong class="text-midnight-soil"><%= post.comments.count %></strong>
+            <span><%= "comment".pluralize(post.comments.count) %></span>
+          </span>
+        </div>
+
+        <%# Action Buttons %>
+        <div class="flex items-center space-x-3">
+          <% if post.likes.exists?(user: current_user) %>
+            <% user_like = post.likes.find_by(user: current_user) %>
+            <%= button_to like_path(user_like), method: :delete, class: "btn bg-living-moss text-white hover:bg-living-moss/80 flex-1" do %>
+              ❤️ Liked
+            <% end %>
+          <% else %>
+            <%= button_to post_likes_path(post), method: :post, class: "btn bg-white border-2 border-living-moss text-living-moss hover:bg-living-moss hover:text-white flex-1" do %>
+              🤍 Like
+            <% end %>
+          <% end %>
+
+          <%= link_to post_path(post), class: "btn bg-mineral-blue text-white hover:bg-mineral-blue/90 flex-1 text-center" do %>
+            💬 View & Comment
+          <% end %>
+        </div>
+      </article>
+    <% end %>
+
+    <%# Empty State %>
+    <% if @posts.empty? %>
+      <div class="card p-12 text-center">
+        <p class="text-xl text-slate-mist mb-4">🌱 No posts yet!</p>
+        <p class="text-slate-mist mb-6">Be the first to share your gardening journey</p>
+        <%= link_to "Create First Post", new_post_path, class: "btn btn-primary" %>
       </div>
-
-      <p><%= post.content %></p>
-
-      <% if post.image %>
-        <%= image_tag post.image %>
-      <% end %>
-
-      <p><small>Posted <%= time_ago_in_words(post.created_at) %> ago</small></p>
-
-      <!-- Post Engagement Stats -->
-      <div class="post-stats">
-        <span>
-          <strong><%= post.likes.count %></strong> <%= "like".pluralize(post.likes.count) %>
-        </span>
-        <span>
-          <strong><%= post.comments.count %></strong> <%= "comment".pluralize(post.comments.count) %>
-        </span>
-      </div>
-
-      <!-- Quick Actions -->
-      <div class="post-actions">
-        <% if post.likes.exists?(user: current_user) %>
-          <% user_like = post.likes.find_by(user: current_user) %>
-          <%= button_to "Unlike", like_path(user_like), method: :delete %>
-        <% else %>
-          <%= button_to "Like", post_likes_path(post), method: :post %>
-        <% end %>
-
-        <%= link_to "View Post & Comments", post_path(post) %>
-      </div>
-    </div>
-  <% end %>
+    <% end %>
+  </div>
 </div>

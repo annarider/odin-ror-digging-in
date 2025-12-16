@@ -1,8 +1,11 @@
-<%= form_with model: @post do |form| %>
+<%= form_with model: @post, class: "space-y-6" do |form| %>
+  <%# Error Messages %>
   <% if @post.errors.any? %>
-    <div class="errors">
-      <h3><%= pluralize(@post.errors.count, "error") %> prevented this post from being saved:</h3>
-      <ul>
+    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+      <h3 class="font-semibold text-red-800 mb-2">
+        <%= pluralize(@post.errors.count, "error") %> prevented this post from being saved:
+      </h3>
+      <ul class="list-disc list-inside text-red-700 space-y-1">
         <% @post.errors.full_messages.each do |message| %>
           <li><%= message %></li>
         <% end %>
@@ -10,15 +13,30 @@
     </div>
   <% end %>
 
+  <%# Content Field %>
   <div>
-    <%= form.label :content %>
-    <%= form.text_area :content %>
+    <%= form.label :content, "What's growing in your garden?", class: "block text-sm font-semibold text-midnight-soil mb-2" %>
+    <%= form.text_area :content,
+        rows: 6,
+        placeholder: "Share your latest gardening adventures, tips, or questions...",
+        class: "textarea-field" %>
+    <p class="text-sm text-slate-mist mt-1">Share what's happening in your garden or ask for advice from fellow gardeners.</p>
   </div>
 
+  <%# Image URL Field %>
   <div>
-    <%= form.label :image %>
-    <%= form.text_field :image %>
+    <%= form.label :image, "Image URL (optional)", class: "block text-sm font-semibold text-midnight-soil mb-2" %>
+    <%= form.text_field :image,
+        placeholder: "https://example.com/your-garden-photo.jpg",
+        class: "input-field" %>
+    <p class="text-sm text-slate-mist mt-1">Add a URL to a photo of your garden, plants, or harvest.</p>
   </div>
 
-  <%= form.submit %>
+  <%# Submit Buttons %>
+  <div class="flex items-center space-x-3">
+    <%= form.submit @post.new_record? ? "Share Post 🌱" : "Update Post ✏️",
+        class: "btn btn-primary" %>
+    <%= link_to "Cancel", @post.new_record? ? posts_path : post_path(@post),
+        class: "btn bg-white border-2 border-slate-mist text-midnight-soil hover:bg-stone-white" %>
+  </div>
 <% end %>

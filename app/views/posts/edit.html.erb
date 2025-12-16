@@ -1,5 +1,12 @@
-<h1>Edit Post</h1>
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <div class="mb-6">
+    <%= link_to post_path(@post), class: "text-mineral-blue hover:text-mineral-blue/80 flex items-center space-x-2" do %>
+      <span>← Back to Post</span>
+    <% end %>
+  </div>
 
-<%= render "form" %>
-
-<%= link_to "Back to Post" , post_path(@post) %>
+  <div class="card p-8">
+    <h1 class="text-3xl font-bold text-midnight-soil mb-6">Edit Post ✏️</h1>
+    <%= render "form" %>
+  </div>
+</div>
