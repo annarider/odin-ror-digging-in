@@ -249,9 +249,9 @@ class UserTest < ActiveSupport::TestCase
 
     # Attach avatar
     user.avatar.attach(
-      io: File.open(Rails.root.join("test", "fixtures", "files", "avatar.png")),
-      filename: "avatar.png",
-      content_type: "image/png"
+      io: File.open(Rails.root.join("test", "fixtures", "files", "avatar.jpg")),
+      filename: "avatar.jpg",
+      content_type: "image/jpeg"
     )
 
     # Assert - Now uses uploaded avatar
@@ -265,9 +265,9 @@ class UserTest < ActiveSupport::TestCase
     # Arrange
     user = create_user(name: "Test User", email: "test@example.com")
     user.avatar.attach(
-      io: File.open(Rails.root.join("test", "fixtures", "files", "avatar.png")),
-      filename: "avatar.png",
-      content_type: "image/png"
+      io: File.open(Rails.root.join("test", "fixtures", "files", "avatar.jpg")),
+      filename: "avatar.jpg",
+      content_type: "image/jpeg"
     )
 
     # Verify avatar is attached

@@ -431,4 +431,282 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", text: @user.name
     assert_match @user.email, response.body
   end
+
+  # ============================================================================
+  # EDIT ACTION TESTS - Profile Photo Upload
+  # ============================================================================
+
+  # ----------------------------------------------------------------------------
+  # Authentication & Authorization
+  # ----------------------------------------------------------------------------
+
+  # Testing BEHAVIOR: Authentication requirement for edit
+  # Testing OUTCOME: Redirects to sign-in page when not authenticated
+  test "edit redirects to sign in when user is not authenticated" do
+    get edit_user_path(@user)
+    assert_redirected_to new_user_session_path
+  end
+
+  # Testing BEHAVIOR: Users can only edit their own profile
+  # Testing OUTCOME: Redirects when trying to edit another user's profile
+  test "edit redirects when user tries to edit another user's profile" do
+    sign_in @user
+
+    get edit_user_path(@other_user)
+    assert_redirected_to root_path
+    # Should show an alert message about authorization
+    assert_equal "You can only edit your own profile.", flash[:alert]
+  end
+
+  # Testing BEHAVIOR: Users can access their own edit page
+  # Testing OUTCOME: Returns successful response with edit form
+  test "edit shows form when user edits their own profile" do
+    sign_in @user
+
+    get edit_user_path(@user)
+    assert_response :success
+    assert_select "h1", text: "Edit Profile"
+  end
+
+  # ----------------------------------------------------------------------------
+  # Edit Form Display
+  # ----------------------------------------------------------------------------
+
+  # Testing BEHAVIOR: Edit form displays current user information
+  # Testing OUTCOME: Form fields are pre-populated with current values
+  test "edit form displays current user name" do
+    sign_in @user
+
+    get edit_user_path(@user)
+    assert_response :success
+    # Form should have a name field with current value
+    assert_select "input[name='user[name]'][value=?]", @user.name
+  end
+
+  # Testing BEHAVIOR: Edit form has file upload field
+  # Testing OUTCOME: Avatar file input is present on page
+  test "edit form has avatar upload field" do
+    sign_in @user
+
+    get edit_user_path(@user)
+    assert_response :success
+    # Form should have a file input for avatar
+    assert_select "input[type='file'][name='user[avatar]']"
+  end
+
+  # Testing BEHAVIOR: Edit form shows current profile picture
+  # Testing OUTCOME: Current avatar/gravatar is displayed
+  test "edit form displays current profile picture" do
+    sign_in @user
+
+    get edit_user_path(@user)
+    assert_response :success
+    # Should show current profile picture (Gravatar in this case)
+    assert_select "img[alt*='current profile picture']"
+  end
+
+  # Testing BEHAVIOR: Edit form indicates if custom avatar exists
+  # Testing OUTCOME: Shows upload status message when avatar attached
+  test "edit form shows avatar status when custom photo uploaded" do
+    sign_in @user
+    # Attach an avatar
+    @user.avatar.attach(
+      io: File.open(Rails.root.join("test", "fixtures", "files", "avatar.jpg")),
+      filename: "avatar.jpg",
+      content_type: "image/jpeg"
+    )
+
+    get edit_user_path(@user)
+    assert_response :success
+    # Should indicate custom photo is uploaded
+    assert_match /Custom photo uploaded/, response.body
+    assert_match /avatar\.jpg/, response.body
+  end
+
+  # ============================================================================
+  # UPDATE ACTION TESTS - Profile Photo Upload
+  # ============================================================================
+
+  # ----------------------------------------------------------------------------
+  # Authentication & Authorization
+  # ----------------------------------------------------------------------------
+
+  # Testing BEHAVIOR: Authentication requirement for update
+  # Testing OUTCOME: Redirects to sign-in page when not authenticated
+  test "update redirects to sign in when user is not authenticated" do
+    patch user_path(@user), params: { user: { name: "New Name" } }
+    assert_redirected_to new_user_session_path
+  end
+
+  # Testing BEHAVIOR: Users cannot update another user's profile
+  # Testing OUTCOME: Redirects when trying to update another user
+  test "update redirects when user tries to update another user's profile" do
+    sign_in @user
+
+    patch user_path(@other_user), params: { user: { name: "Hacked Name" } }
+    assert_redirected_to root_path
+    assert_equal "You can only edit your own profile.", flash[:alert]
+    # Verify the other user's name wasn't changed
+    assert_not_equal "Hacked Name", @other_user.reload.name
+  end
+
+  # ----------------------------------------------------------------------------
+  # Successful Updates
+  # ----------------------------------------------------------------------------
+
+  # Testing BEHAVIOR: User can update their name
+  # Testing OUTCOME: Name is changed and user is redirected to profile
+  test "update changes user name with valid data" do
+    sign_in @user
+    original_name = @user.name
+
+    patch user_path(@user), params: { user: { name: "New Garden Name" } }
+
+    # Should redirect to profile page
+    assert_redirected_to user_path(@user)
+    # Should show success message
+    assert_equal "Profile updated successfully!", flash[:notice]
+    # Name should be changed in database
+    assert_equal "New Garden Name", @user.reload.name
+    assert_not_equal original_name, @user.name
+  end
+
+  # Testing BEHAVIOR: User can upload a profile photo
+  # Testing OUTCOME: Avatar is attached and user is redirected
+  test "update attaches avatar when file is uploaded" do
+    sign_in @user
+
+    # Verify no avatar initially
+    assert_not @user.avatar.attached?
+
+    # Upload avatar
+    avatar_file = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    patch user_path(@user), params: { user: { avatar: avatar_file } }
+
+    # Should redirect to profile
+    assert_redirected_to user_path(@user)
+    assert_equal "Profile updated successfully!", flash[:notice]
+
+    # Avatar should now be attached
+    @user.reload
+    assert @user.avatar.attached?
+    assert_equal "avatar.jpg", @user.avatar.filename.to_s
+  end
+
+  # Testing BEHAVIOR: User can update both name and avatar together
+  # Testing OUTCOME: Both fields are updated in single request
+  test "update changes both name and avatar simultaneously" do
+    sign_in @user
+    original_name = @user.name
+
+    avatar_file = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    patch user_path(@user), params: {
+      user: {
+        name: "Updated Name",
+        avatar: avatar_file
+      }
+    }
+
+    assert_redirected_to user_path(@user)
+    @user.reload
+
+    # Both should be updated
+    assert_equal "Updated Name", @user.name
+    assert_not_equal original_name, @user.name
+    assert @user.avatar.attached?
+  end
+
+  # Testing BEHAVIOR: Updating without changing avatar keeps existing avatar
+  # Testing OUTCOME: Existing avatar persists when not included in update
+  test "update preserves existing avatar when not uploading new one" do
+    sign_in @user
+
+    # First, upload an avatar
+    avatar_file = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    @user.avatar.attach(avatar_file)
+    @user.save!
+    assert @user.avatar.attached?
+    original_blob_id = @user.avatar.blob.id
+
+    # Update just the name
+    patch user_path(@user), params: { user: { name: "Name Change Only" } }
+
+    @user.reload
+    # Avatar should still be attached
+    assert @user.avatar.attached?
+    assert_equal original_blob_id, @user.avatar.blob.id
+    # Name should be updated
+    assert_equal "Name Change Only", @user.name
+  end
+
+  # Testing BEHAVIOR: Uploading new avatar replaces old one
+  # Testing OUTCOME: New file replaces previous avatar
+  test "update replaces old avatar when uploading new one" do
+    sign_in @user
+
+    # First avatar
+    first_avatar = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    @user.avatar.attach(first_avatar)
+    @user.save!
+    first_blob_id = @user.avatar.blob.id
+
+    # Upload second avatar (same file is fine for test - Rails will create new blob)
+    second_avatar = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    patch user_path(@user), params: { user: { avatar: second_avatar } }
+
+    @user.reload
+    # Should have new avatar
+    assert @user.avatar.attached?
+    # The blob should be different (new upload)
+    assert_not_equal first_blob_id, @user.avatar.blob.id
+  end
+
+  # ----------------------------------------------------------------------------
+  # Validation & Error Handling
+  # ----------------------------------------------------------------------------
+
+  # Testing BEHAVIOR: Update fails with invalid data
+  # Testing OUTCOME: Returns to edit form with errors when name is blank
+  test "update shows errors when validation fails" do
+    sign_in @user
+    original_name = @user.name
+
+    # Try to update with blank name (should fail validation)
+    patch user_path(@user), params: { user: { name: "" } }
+
+    # Should re-render edit form with error status
+    assert_response :unprocessable_entity
+    assert_template :edit
+
+    # Name should not change in database
+    assert_equal original_name, @user.reload.name
+  end
+
+  # Testing BEHAVIOR: Error message displays validation errors
+  # Testing OUTCOME: User sees what went wrong on failed update
+  test "update displays validation error messages on edit form" do
+    sign_in @user
+
+    patch user_path(@user), params: { user: { name: "" } }
+
+    assert_response :unprocessable_entity
+    # Should show error messages
+    assert_select ".bg-red-50" # error message container
+    assert_match /Name can't be blank/, response.body
+  end
+
+  # Testing BEHAVIOR: JPEG image format is accepted
+  # Testing OUTCOME: System successfully handles JPEG uploads
+  test "update accepts JPEG image format" do
+    sign_in @user
+
+    # Test with JPEG (our fixture)
+    avatar_file = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    patch user_path(@user), params: { user: { avatar: avatar_file } }
+
+    assert_redirected_to user_path(@user)
+    @user.reload
+    assert @user.avatar.attached?
+    assert_equal "image/jpeg", @user.avatar.content_type
+  end
 end
