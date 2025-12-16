@@ -1,0 +1,85 @@
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <%# Back Navigation %>
+  <div class="mb-6">
+    <%= link_to user_path(@user), class: "text-mineral-blue hover:text-mineral-blue/80 flex items-center space-x-2" do %>
+      <span>← Back to Profile</span>
+    <% end %>
+  </div>
+
+  <%# Page Header %>
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold text-midnight-soil mb-2">Edit Profile</h1>
+    <p class="text-slate-mist">Update your profile picture and information</p>
+  </div>
+
+  <%# Edit Form Card %>
+  <div class="card p-8">
+    <%= form_with model: @user, local: true, class: "space-y-6" do |form| %>
+      <%# Error Messages %>
+      <% if @user.errors.any? %>
+        <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+          <h3 class="font-semibold text-red-800 mb-2">
+            <%= pluralize(@user.errors.count, "error") %> prevented your profile from being saved:
+          </h3>
+          <ul class="list-disc list-inside text-red-700 space-y-1">
+            <% @user.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <%# Current Avatar Display %>
+      <div>
+        <label class="block text-sm font-semibold text-midnight-soil mb-3">Current Profile Picture</label>
+        <div class="flex items-center space-x-4">
+          <%= image_tag @user.profile_picture_url(size: 150),
+              alt: "#{@user.name}'s current profile picture",
+              class: "w-24 h-24 rounded-full border-4 border-living-moss" %>
+          <div class="text-sm text-slate-mist">
+            <% if @user.avatar.attached? %>
+              <p class="font-semibold text-midnight-soil mb-1">Custom photo uploaded</p>
+              <p>Filename: <%= @user.avatar.filename %></p>
+            <% else %>
+              <p>Using Gravatar default</p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <%# Avatar Upload Field %>
+      <div>
+        <%= form.label :avatar, "Upload New Profile Picture", class: "block text-sm font-semibold text-midnight-soil mb-2" %>
+        <%= form.file_field :avatar,
+            accept: "image/*",
+            class: "block w-full text-sm text-slate-mist
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-living-moss file:text-white
+                    hover:file:bg-living-moss/90
+                    cursor-pointer" %>
+        <p class="text-sm text-slate-mist mt-2">
+          Choose a photo that represents you in the garden community. Accepted formats: JPG, PNG, GIF
+        </p>
+      </div>
+
+      <%# Name Field %>
+      <div>
+        <%= form.label :name, "Display Name", class: "block text-sm font-semibold text-midnight-soil mb-2" %>
+        <%= form.text_field :name,
+            placeholder: "Your name",
+            class: "input-field" %>
+        <p class="text-sm text-slate-mist mt-1">This is how other gardeners will see you.</p>
+      </div>
+
+      <%# Submit Buttons %>
+      <div class="flex items-center space-x-3 pt-4">
+        <%= form.submit "Update Profile",
+            class: "btn btn-primary" %>
+        <%= link_to "Cancel", user_path(@user),
+            class: "btn bg-white border-2 border-slate-mist text-midnight-soil hover:bg-stone-white" %>
+      </div>
+    <% end %>
+  </div>
+</div>
