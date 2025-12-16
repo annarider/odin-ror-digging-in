@@ -12,11 +12,20 @@
       <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "space-y-6" }) do |f| %>
         <%= render "devise/shared/error_messages", resource: resource %>
 
+        <%# Name Field %>
+        <div>
+          <%= f.label :name, class: "block text-sm font-semibold text-midnight-soil mb-2" %>
+          <%= f.text_field :name,
+              autofocus: true,
+              autocomplete: "name",
+              placeholder: "Your name",
+              class: "input-field" %>
+        </div>
+
         <%# Email Field %>
         <div>
           <%= f.label :email, class: "block text-sm font-semibold text-midnight-soil mb-2" %>
           <%= f.email_field :email,
-              autofocus: true,
               autocomplete: "email",
               placeholder: "your@email.com",
               class: "input-field" %>
