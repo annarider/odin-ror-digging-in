@@ -1,48 +1,90 @@
-<div class="friend-requests-container">
-  <h1>Friend Requests</h1>
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+  <h1 class="text-3xl font-bold text-midnight-soil mb-8">Friend Requests 🤝</h1>
 
-  <section class="received-requests">
-    <h2>Received Requests</h2>
-    <% if @received_requests.any? %>
-      <div class="requests-list">
-        <% @received_requests.each do |request| %>
-          <div class="request-card">
-            <%= image_tag request.sender.profile_picture_url(size: 50), alt: "#{request.sender.name}'s profile picture", class: "profile-picture" %>
-            <div class="request-info">
-              <strong><%= request.sender.name %></strong>
-              <span class="request-date">Sent <%= time_ago_in_words(request.created_at) %> ago</span>
-            </div>
-            <div class="request-actions">
-              <%= button_to "Accept", friend_request_path(request), method: :patch, params: { status: "accepted" }, class: "btn btn-accept" %>
-              <%= button_to "Reject", friend_request_path(request), method: :patch, params: { status: "rejected" }, class: "btn btn-reject" %>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% else %>
-      <p class="no-requests">No pending friend requests received.</p>
-    <% end %>
-  </section>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <%# Received Requests Section %>
+    <section>
+      <h2 class="text-2xl font-semibold text-midnight-soil mb-6 flex items-center space-x-2">
+        <span>📥</span>
+        <span>Received</span>
+      </h2>
 
-  <section class="sent-requests">
-    <h2>Sent Requests</h2>
-    <% if @sent_requests.any? %>
-      <div class="requests-list">
-        <% @sent_requests.each do |request| %>
-          <div class="request-card">
-            <%= image_tag request.receiver.profile_picture_url(size: 50), alt: "#{request.receiver.name}'s profile picture", class: "profile-picture" %>
-            <div class="request-info">
-              <strong><%= request.receiver.name %></strong>
-              <span class="request-date">Sent <%= time_ago_in_words(request.created_at) %> ago</span>
+      <% if @received_requests.any? %>
+        <div class="space-y-4">
+          <% @received_requests.each do |request| %>
+            <div class="card p-4 hover:shadow-lg transition-shadow">
+              <div class="flex items-center space-x-4 mb-4">
+                <%= link_to user_path(request.sender) do %>
+                  <%= image_tag request.sender.profile_picture_url(size: 50),
+                      alt: "#{request.sender.name}'s profile picture",
+                      class: "w-12 h-12 rounded-full border-2 border-mineral-blue" %>
+                <% end %>
+                <div class="flex-1">
+                  <strong class="text-midnight-soil text-lg">
+                    <%= link_to request.sender.name, user_path(request.sender), class: "hover:text-mineral-blue transition-colors" %>
+                  </strong>
+                  <p class="text-sm text-slate-mist">
+                    Sent <%= time_ago_in_words(request.created_at) %> ago
+                  </p>
+                </div>
+              </div>
+
+              <div class="flex items-center space-x-3">
+                <%= button_to friend_request_path(request), method: :patch, params: { status: "accepted" }, class: "btn btn-secondary flex-1" do %>
+                  ✓ Accept
+                <% end %>
+                <%= button_to friend_request_path(request), method: :patch, params: { status: "rejected" }, class: "btn btn-danger flex-1" do %>
+                  ✗ Reject
+                <% end %>
+              </div>
             </div>
-            <div class="request-actions">
-              <%= button_to "Cancel", friend_request_path(request), method: :delete, class: "btn btn-cancel", data: { confirm: "Are you sure you want to cancel this friend request?" } %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="card p-8 text-center">
+          <p class="text-slate-mist">No pending requests received 🌱</p>
+        </div>
+      <% end %>
+    </section>
+
+    <%# Sent Requests Section %>
+    <section>
+      <h2 class="text-2xl font-semibold text-midnight-soil mb-6 flex items-center space-x-2">
+        <span>📤</span>
+        <span>Sent</span>
+      </h2>
+
+      <% if @sent_requests.any? %>
+        <div class="space-y-4">
+          <% @sent_requests.each do |request| %>
+            <div class="card p-4 hover:shadow-lg transition-shadow">
+              <div class="flex items-center space-x-4 mb-4">
+                <%= link_to user_path(request.receiver) do %>
+                  <%= image_tag request.receiver.profile_picture_url(size: 50),
+                      alt: "#{request.receiver.name}'s profile picture",
+                      class: "w-12 h-12 rounded-full border-2 border-slate-mist" %>
+                <% end %>
+                <div class="flex-1">
+                  <strong class="text-midnight-soil text-lg">
+                    <%= link_to request.receiver.name, user_path(request.receiver), class: "hover:text-mineral-blue transition-colors" %>
+                  </strong>
+                  <p class="text-sm text-slate-mist">
+                    Sent <%= time_ago_in_words(request.created_at) %> ago
+                  </p>
+                </div>
+              </div>
+
+              <%= button_to friend_request_path(request), method: :delete, data: { turbo_confirm: "Are you sure you want to cancel this friend request?" }, class: "btn bg-slate-mist text-white hover:bg-slate-mist/80 w-full" do %>
+                Cancel Request
+              <% end %>
             </div>
-          </div>
-        <% end %>
-      </div>
-    <% else %>
-      <p class="no-requests">No pending friend requests sent.</p>
-    <% end %>
-  </section>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="card p-8 text-center">
+          <p class="text-slate-mist">No pending requests sent 🌱</p>
+        </div>
+      <% end %>
+    </section>
+  </div>
 </div>
