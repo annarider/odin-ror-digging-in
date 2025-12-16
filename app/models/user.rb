@@ -60,11 +60,18 @@ class User < ApplicationRecord
       received_requests.pending.exists?(sender_id: other_user.id)
   end
 
-  # Returns the Gravatar URL for this user's profile picture
-  # Can be overridden later to support OmniAuth profile pictures
+  # Returns the URL for this user's profile picture
+  # Prioritizes uploaded avatar, falls back to Gravatar if none uploaded
   def profile_picture_url(size: 80)
-    gravatar_id = Digest::MD5.hexdigest(email.downcase.strip)
-    "https://www.gravatar.com/avatar/#{gravatar_id}?s=#{size}&d=identicon"
+    if avatar.attached?
+      # Rails.application.routes.url_helpers gives us access to route helpers in models
+      # variant(resize_to_limit: [size, size]) creates a resized version on-the-fly
+      avatar.variant(resize_to_limit: [ size, size ])
+    else
+      # Fallback to Gravatar if no avatar uploaded
+      gravatar_id = Digest::MD5.hexdigest(email.downcase.strip)
+      "https://www.gravatar.com/avatar/#{gravatar_id}?s=#{size}&d=identicon"
+    end
   end
 
   private
