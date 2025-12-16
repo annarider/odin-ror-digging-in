@@ -47,3 +47,14 @@
 body {
   @apply bg-stone-white text-midnight-soil;
 }
+
+/* Responsive navigation improvements */
+@media (max-width: 768px) {
+  nav .container > div {
+    @apply flex-wrap gap-4;
+  }
+
+  nav .flex.items-center.space-x-6 {
+    @apply order-3 w-full justify-center space-x-4;
+  }
+}
