@@ -112,7 +112,9 @@ class UserMailerTest < ActionMailer::TestCase
     # Email bodies use quoted-printable encoding, so we need to decode first
     # The HTML part will have the user's name properly rendered
     html_body = mail.html_part.body.decoded
-    assert_match "María José O'Connor", html_body
+    # Note: ERB HTML-escapes apostrophes as &#39; for safety
+    assert_match "María José", html_body
+    assert_match "O&#39;Connor", html_body # HTML-escaped apostrophe
     assert_equal [ "maria@example.com" ], mail.to
   end
 end
