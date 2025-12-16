@@ -1,0 +1,50 @@
+<div class="min-h-screen flex items-center justify-center py-12 px-4">
+  <div class="max-w-md w-full">
+    <%# Header %>
+    <div class="text-center mb-8">
+      <div class="text-6xl mb-4">🔒</div>
+      <h1 class="text-4xl font-bold text-midnight-soil mb-2">Reset Password</h1>
+      <p class="text-slate-mist">Enter your new password below</p>
+    </div>
+
+    <%# Password Reset Card %>
+    <div class="card p-8">
+      <%= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :put, class: "space-y-6" }) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
+        <%= f.hidden_field :reset_password_token %>
+
+        <%# New Password Field %>
+        <div>
+          <%= f.label :password, "New password", class: "block text-sm font-semibold text-midnight-soil mb-2" %>
+          <% if @minimum_password_length %>
+            <span class="text-xs text-slate-mist">(<%= @minimum_password_length %> characters minimum)</span>
+          <% end %>
+          <%= f.password_field :password,
+              autofocus: true,
+              autocomplete: "new-password",
+              placeholder: "Enter new password",
+              class: "input-field" %>
+        </div>
+
+        <%# Confirm Password Field %>
+        <div>
+          <%= f.label :password_confirmation, "Confirm new password", class: "block text-sm font-semibold text-midnight-soil mb-2" %>
+          <%= f.password_field :password_confirmation,
+              autocomplete: "new-password",
+              placeholder: "Confirm new password",
+              class: "input-field" %>
+        </div>
+
+        <%# Submit Button %>
+        <div>
+          <%= f.submit "Change Password", class: "btn btn-primary w-full text-lg" %>
+        </div>
+      <% end %>
+
+      <%# Additional Links %>
+      <div class="mt-6 pt-6 border-t border-slate-mist/20">
+        <%= render "devise/shared/links" %>
+      </div>
+    </div>
+  </div>
+</div>

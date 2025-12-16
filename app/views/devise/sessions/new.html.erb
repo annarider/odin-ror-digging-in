@@ -1,0 +1,52 @@
+<div class="min-h-screen flex items-center justify-center py-12 px-4">
+  <div class="max-w-md w-full">
+    <%# Welcome Header %>
+    <div class="text-center mb-8">
+      <div class="text-6xl mb-4">🌱</div>
+      <h1 class="text-4xl font-bold text-midnight-soil mb-2">Welcome Back!</h1>
+      <p class="text-slate-mist">Sign in to your GardenBook account</p>
+    </div>
+
+    <%# Sign In Card %>
+    <div class="card p-8">
+      <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "space-y-6" }) do |f| %>
+        <%# Email Field %>
+        <div>
+          <%= f.label :email, class: "block text-sm font-semibold text-midnight-soil mb-2" %>
+          <%= f.email_field :email,
+              autofocus: true,
+              autocomplete: "email",
+              placeholder: "your@email.com",
+              class: "input-field" %>
+        </div>
+
+        <%# Password Field %>
+        <div>
+          <%= f.label :password, class: "block text-sm font-semibold text-midnight-soil mb-2" %>
+          <%= f.password_field :password,
+              autocomplete: "current-password",
+              placeholder: "Enter your password",
+              class: "input-field" %>
+        </div>
+
+        <%# Remember Me Checkbox %>
+        <% if devise_mapping.rememberable? %>
+          <div class="flex items-center">
+            <%= f.check_box :remember_me, class: "w-4 h-4 text-mineral-blue border-slate-mist rounded focus:ring-2 focus:ring-mineral-blue" %>
+            <%= f.label :remember_me, class: "ml-2 text-sm text-midnight-soil" %>
+          </div>
+        <% end %>
+
+        <%# Submit Button %>
+        <div>
+          <%= f.submit "Sign In", class: "btn btn-primary w-full text-lg" %>
+        </div>
+      <% end %>
+
+      <%# Additional Links %>
+      <div class="mt-6 pt-6 border-t border-slate-mist/20">
+        <%= render "devise/shared/links" %>
+      </div>
+    </div>
+  </div>
+</div>
