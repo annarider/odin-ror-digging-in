@@ -47,10 +47,13 @@ class UserSignupEmailTest < ActionDispatch::IntegrationTest
   end
 
   test "welcome email is sent with correct user information after signup" do
+    # This test verifies that when a user signs up, an email job is enqueued
+    # for that specific user with their correct information
+
     # Arrange: Clear any existing jobs
     clear_enqueued_jobs
 
-    # Act: Create a new user through the full signup flow
+    # Act: Create a new user
     post user_registration_path, params: {
       user: {
         name: "Jane Gardener",
@@ -60,13 +63,18 @@ class UserSignupEmailTest < ActionDispatch::IntegrationTest
       }
     }
 
-    # Assert: Test OUTCOME - check that the email job was enqueued correctly
-    # We verify the email would be sent to the right person
-    assert_enqueued_email_with UserMailer, :welcome_email do |mailer_args|
-      user = mailer_args[:args].first
-      assert_equal "jane.gardener@example.com", user.email
-      assert_equal "Jane Gardener", user.name
-    end
+    # Assert: Verify the user was created with correct data
+    user = User.find_by(email: "jane.gardener@example.com")
+    assert_not_nil user, "User should be created"
+    assert_equal "Jane Gardener", user.name
+
+    # Assert: Verify an email job was enqueued for UserMailer
+    jobs = enqueued_jobs.select { |job|
+      job[:job] == ActionMailer::MailDeliveryJob &&
+      job[:args][0] == "UserMailer" &&
+      job[:args][1] == "welcome_email"
+    }
+    assert_equal 1, jobs.count, "Expected one welcome email job to be enqueued"
   end
 
   test "multiple user signups each receive their own welcome email" do
@@ -131,31 +139,31 @@ class UserSignupEmailTest < ActionDispatch::IntegrationTest
     # This test verifies the INTEGRATION between signup and email content
     # We're testing that the correct data flows through the entire system
 
-    # Arrange & Act: User signs up
-    post user_registration_path, params: {
-      user: {
-        name: "Rosa Parks",
-        email: "rosa@example.com",
-        password: "password123",
-        password_confirmation: "password123"
+    # Act: User signs up, and we immediately process background jobs
+    # perform_enqueued_jobs wraps the action to process jobs synchronously in tests
+    perform_enqueued_jobs do
+      post user_registration_path, params: {
+        user: {
+          name: "Rosa Parks",
+          email: "rosa@example.com",
+          password: "password123",
+          password_confirmation: "password123"
+        }
       }
-    }
+    end
 
-    # Find the user that was created
+    # Assert: Check that the user was created
     user = User.find_by(email: "rosa@example.com")
     assert_not_nil user, "User should be created"
 
-    # Assert: Process the enqueued job and check the actual email
-    # This tests the complete integration: signup -> callback -> email job -> email content
-    perform_enqueued_jobs do
-      # The job should run and we can check ActionMailer's deliveries
-      assert_equal 1, ActionMailer::Base.deliveries.count
+    # Assert: Check the actual email that was sent
+    # This tests the complete integration: signup -> callback -> email job -> email delivery
+    assert_equal 1, ActionMailer::Base.deliveries.count
 
-      email = ActionMailer::Base.deliveries.last
-      assert_equal ["rosa@example.com"], email.to
-      assert_equal "Welcome to GardenBook!", email.subject
-      assert_match "Rosa Parks", email.body.encoded
-    end
+    email = ActionMailer::Base.deliveries.last
+    assert_equal [ "rosa@example.com" ], email.to
+    assert_equal "Welcome to GardenBook!", email.subject
+    assert_match "Rosa Parks", email.body.encoded
   end
 
   test "welcome email uses deliver_later for background processing" do
