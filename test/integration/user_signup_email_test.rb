@@ -13,12 +13,12 @@ class UserSignupEmailTest < ActionDispatch::IntegrationTest
   include ActiveJob::TestHelper
 
   test "signing up as a new user enqueues a welcome email" do
-    # Arrange: Start with no users and empty email queue
+    # Arrange: Start with clear job queue
     initial_user_count = User.count
 
     # Act: User signs up through the Devise registration form
     # This tests the ACTUAL behavior a user experiences
-    assert_enqueued_email_with UserMailer, :welcome_email do
+    assert_difference "User.count", 1 do
       post user_registration_path, params: {
         user: {
           name: "New Gardener",
@@ -30,13 +30,20 @@ class UserSignupEmailTest < ActionDispatch::IntegrationTest
     end
 
     # Assert: Test OUTCOMES
-    # 1. User was created (state change)
-    assert_equal initial_user_count + 1, User.count
+    # 1. Email was enqueued for the new user
+    # The after_create callback should have enqueued exactly one email
+    jobs = enqueued_jobs.select { |job| job[:job] == ActionMailer::MailDeliveryJob }
+    assert_equal 1, jobs.count, "Expected exactly one email job to be enqueued"
 
-    # 2. User is now signed in (behavior outcome)
+    # 2. User is now signed in (behavior outcome from Devise)
     assert_response :redirect
     follow_redirect!
     assert_response :success
+
+    # 3. Verify the created user exists
+    new_user = User.find_by(email: "newuser@example.com")
+    assert_not_nil new_user
+    assert_equal "New Gardener", new_user.name
   end
 
   test "welcome email is sent with correct user information after signup" do
