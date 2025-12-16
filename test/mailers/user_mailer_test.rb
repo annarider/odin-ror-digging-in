@@ -73,7 +73,8 @@ class UserMailerTest < ActionMailer::TestCase
     # Assert: Test OUTCOME - user can click to visit the site
     # From user's perspective: "How do I get back to the site?"
     assert_match "Visit GardenBook", mail.body.encoded
-    assert_match root_url, mail.body.encoded
+    # Rails test environment uses http://example.com/ as the default root URL
+    assert_match "http://example.com/", mail.body.encoded
   end
 
   test "welcome_email renders as HTML" do
@@ -87,9 +88,13 @@ class UserMailerTest < ActionMailer::TestCase
     # Act
     mail = UserMailer.welcome_email(user)
 
-    # Assert: Test OUTCOME - email is properly formatted as HTML
-    assert_equal "text/html", mail.content_type.split(";").first
+    # Assert: Test OUTCOME - email is properly formatted
+    # Rails generates multipart emails (both HTML and plain text versions)
+    assert_equal "multipart/alternative", mail.content_type.split(";").first
     assert_match "<html>", mail.body.encoded
+    # Check that HTML part exists
+    assert mail.html_part.present?
+    assert_equal "text/html", mail.html_part.content_type.split(";").first
   end
 
   test "welcome_email works with different user names" do
@@ -104,7 +109,10 @@ class UserMailerTest < ActionMailer::TestCase
     mail = UserMailer.welcome_email(user)
 
     # Assert: Test OUTCOME - names with special chars are handled correctly
-    assert_match "María José O'Connor", mail.body.encoded
+    # Email bodies use quoted-printable encoding, so we need to decode first
+    # The HTML part will have the user's name properly rendered
+    html_body = mail.html_part.body.decoded
+    assert_match "María José O'Connor", html_body
     assert_equal [ "maria@example.com" ], mail.to
   end
 end
