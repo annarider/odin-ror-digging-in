@@ -16,6 +16,9 @@ class User < ApplicationRecord
   # Likes association
   has_many :likes, dependent: :destroy
 
+  # Active Storage association for profile photo
+  has_one_attached :avatar
+
   # Friend requests this user sent - get FriendRequest Objects
   has_many :sent_requests, foreign_key: :sender_id, class_name: "FriendRequest", dependent: :destroy
 
