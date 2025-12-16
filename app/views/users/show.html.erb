@@ -14,7 +14,14 @@
           class: "w-32 h-32 rounded-full border-4 border-living-moss flex-shrink-0" %>
 
       <div class="flex-1">
-        <h1 class="text-4xl font-bold text-midnight-soil mb-2"><%= @user.name %></h1>
+        <div class="flex items-start justify-between mb-2">
+          <h1 class="text-4xl font-bold text-midnight-soil"><%= @user.name %></h1>
+          <% if @user == current_user %>
+            <%= link_to edit_user_path(@user), class: "btn btn-primary text-sm" do %>
+              ✏️ Edit Profile
+            <% end %>
+          <% end %>
+        </div>
         <p class="text-slate-mist mb-1"><%= @user.email %></p>
         <p class="text-sm text-slate-mist mb-6">
           🌱 Member since <%= @user.created_at.strftime("%B %Y") %>
