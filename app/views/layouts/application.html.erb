@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Odin Ror Digging In" %></title>
+    <title><%= content_for(:title) || "GardenBook" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
@@ -22,9 +22,58 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
-    <p class="notice"><%= notice %></p>
-    <p class="alert"><%= alert %></p>
-    <%= yield %>
+  <body class="min-h-screen flex flex-col">
+    <%# Navigation Bar %>
+    <% if user_signed_in? %>
+      <nav class="bg-midnight-soil text-white shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+          <div class="flex items-center justify-between">
+            <%# Logo/Brand %>
+            <div class="flex items-center space-x-2">
+              <span class="text-2xl">🌱</span>
+              <%= link_to "GardenBook", root_path, class: "text-xl font-bold text-sunstruck-gold hover:text-sunstruck-gold/80 transition-colors" %>
+            </div>
+
+            <%# Navigation Links %>
+            <div class="flex items-center space-x-6">
+              <%= link_to "Feed", posts_path, class: "hover:text-living-moss transition-colors" %>
+              <%= link_to "Gardeners", users_path, class: "hover:text-living-moss transition-colors" %>
+              <%= link_to "Friend Requests", friend_requests_path, class: "hover:text-living-moss transition-colors" %>
+            </div>
+
+            <%# User Menu %>
+            <div class="flex items-center space-x-4">
+              <%= link_to "My Profile", user_path(current_user), class: "hover:text-living-moss transition-colors" %>
+              <%= button_to "Sign Out", destroy_user_session_path, method: :delete, class: "btn btn-secondary text-sm", data: { turbo: false } %>
+            </div>
+          </div>
+        </div>
+      </nav>
+    <% end %>
+
+    <%# Flash Messages %>
+    <% if notice.present? %>
+      <div class="bg-living-moss/10 border-l-4 border-living-moss text-living-moss px-4 py-3 mx-4 mt-4 rounded" role="alert">
+        <p><%= notice %></p>
+      </div>
+    <% end %>
+
+    <% if alert.present? %>
+      <div class="bg-red-100 border-l-4 border-red-500 text-red-700 px-4 py-3 mx-4 mt-4 rounded" role="alert">
+        <p><%= alert %></p>
+      </div>
+    <% end %>
+
+    <%# Main Content %>
+    <main class="flex-1">
+      <%= yield %>
+    </main>
+
+    <%# Footer %>
+    <footer class="bg-midnight-soil text-stone-white py-6 mt-12">
+      <div class="container mx-auto px-4 text-center">
+        <p class="text-sm">🌱 GardenBook - A social network for gardeners</p>
+      </div>
+    </footer>
   </body>
 </html>
