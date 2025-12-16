@@ -1,29 +1,53 @@
-<div class="container">
-  <h1>All Gardeners</h1>
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-midnight-soil mb-2">All Gardeners 👥</h1>
+    <p class="text-slate-mist">Connect with fellow garden enthusiasts</p>
+  </div>
 
-  <div class="users-list">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     <% @users.each do |user| %>
-      <div class="user-card">
-        <%= image_tag user.profile_picture_url(size: 60), alt: "#{user.name}'s profile picture", class: "profile-picture" %>
-
-        <div class="user-info">
-          <h3><%= link_to user.name, user_path(user) %></h3>
-          <p><%= user.email %></p>
-        </div>
-
-        <div class="user-actions">
-          <% if current_user.friend?(user) %>
-            <!-- Already friends - show a badge/status -->
-            <span class="badge friend-badge">Friends</span>
-          <% elsif current_user.friend_request_pending?(user) %>
-            <!-- Pending friend request - show pending status -->
-            <span class="badge pending-badge">Request Pending</span>
-          <% else %>
-            <!-- Not friends and no pending request - show "Add Friend" button -->
-            <%= button_to "Add Friend", friend_requests_path(receiver_id: user.id), method: :post, class: "btn btn-primary" %>
+      <div class="card p-6 hover:shadow-lg transition-shadow">
+        <div class="flex flex-col items-center text-center">
+          <%= link_to user_path(user) do %>
+            <%= image_tag user.profile_picture_url(size: 80),
+                alt: "#{user.name}'s profile picture",
+                class: "w-20 h-20 rounded-full border-2 border-living-moss mb-4" %>
           <% end %>
+
+          <h3 class="font-bold text-lg text-midnight-soil mb-1">
+            <%= link_to user.name, user_path(user), class: "hover:text-mineral-blue transition-colors" %>
+          </h3>
+          <p class="text-sm text-slate-mist mb-4 truncate w-full"><%= user.email %></p>
+
+          <%# Friend Status / Actions %>
+          <div class="w-full">
+            <% if user == current_user %>
+              <span class="inline-block px-4 py-2 rounded-lg bg-sunstruck-gold/20 text-sunstruck-gold font-medium text-sm">
+                That's You! 🌱
+              </span>
+            <% elsif current_user.friend?(user) %>
+              <span class="inline-block px-4 py-2 rounded-lg bg-living-moss/20 text-living-moss font-medium text-sm">
+                ✓ Friends
+              </span>
+            <% elsif current_user.friend_request_pending?(user) %>
+              <span class="inline-block px-4 py-2 rounded-lg bg-slate-mist/20 text-slate-mist font-medium text-sm">
+                ⏳ Request Pending
+              </span>
+            <% else %>
+              <%= button_to friend_requests_path(receiver_id: user.id), method: :post, class: "btn bg-mineral-blue text-white hover:bg-mineral-blue/90 w-full" do %>
+                + Add Friend
+              <% end %>
+            <% end %>
+          </div>
         </div>
       </div>
     <% end %>
   </div>
+
+  <%# Empty State %>
+  <% if @users.empty? %>
+    <div class="card p-12 text-center">
+      <p class="text-xl text-slate-mist">No gardeners found 🌱</p>
+    </div>
+  <% end %>
 </div>
