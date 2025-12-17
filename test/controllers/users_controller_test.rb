@@ -599,7 +599,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     sign_in @user
     original_name = @user.name
 
-    avatar_file = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    avatar_file = fixture_file_upload("avatar.jpg", "image/jpeg")
     patch user_path(@user), params: {
       user: {
         name: "Updated Name",
@@ -622,7 +622,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     sign_in @user
 
     # First, upload an avatar
-    avatar_file = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    avatar_file = fixture_file_upload("avatar.jpg", "image/jpeg")
     @user.avatar.attach(avatar_file)
     @user.save!
     assert @user.avatar.attached?
@@ -645,13 +645,13 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     sign_in @user
 
     # First avatar
-    first_avatar = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    first_avatar = fixture_file_upload("avatar.jpg", "image/jpeg")
     @user.avatar.attach(first_avatar)
     @user.save!
     first_blob_id = @user.avatar.blob.id
 
     # Upload second avatar (same file is fine for test - Rails will create new blob)
-    second_avatar = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    second_avatar = fixture_file_upload("avatar.jpg", "image/jpeg")
     patch user_path(@user), params: { user: { avatar: second_avatar } }
 
     @user.reload
@@ -701,7 +701,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     sign_in @user
 
     # Test with JPEG (our fixture)
-    avatar_file = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    avatar_file = fixture_file_upload("avatar.jpg", "image/jpeg")
     patch user_path(@user), params: { user: { avatar: avatar_file } }
 
     assert_redirected_to user_path(@user)
