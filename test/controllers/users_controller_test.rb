@@ -580,7 +580,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_not @user.avatar.attached?
 
     # Upload avatar
-    avatar_file = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    avatar_file = fixture_file_upload("avatar.jpg", "image/jpeg")
     patch user_path(@user), params: { user: { avatar: avatar_file } }
 
     # Should redirect to profile
