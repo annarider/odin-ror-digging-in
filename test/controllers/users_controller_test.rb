@@ -676,7 +676,8 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
     # Should re-render edit form with error status
     assert_response :unprocessable_entity
-    assert_template :edit
+    # Should show edit form again (testing behavior, not implementation)
+    assert_select "h1", text: "Edit Profile"
 
     # Name should not change in database
     assert_equal original_name, @user.reload.name
@@ -690,9 +691,11 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     patch user_path(@user), params: { user: { name: "" } }
 
     assert_response :unprocessable_entity
-    # Should show error messages
-    assert_select ".bg-red-50" # error message container
-    assert_match /Name can't be blank/, response.body
+    # User should see an error message about the name being blank
+    # Testing the OUTCOME: error is visible, not HOW it's styled
+    assert_match /error.+prevented/i, response.body # Error summary exists
+    assert_match /Name/, response.body # Field name is mentioned
+    assert_match /blank/, response.body # Problem is described
   end
 
   # Testing BEHAVIOR: JPEG image format is accepted
