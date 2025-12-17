@@ -28,7 +28,7 @@ class UserProfilePhotoTest < ActionDispatch::IntegrationTest
     assert_select "input[type='file'][name='user[avatar]']"
 
     # User uploads a photo
-    avatar_file = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    avatar_file = fixture_file_upload("avatar.jpg", "image/jpeg")
     patch user_path(@user), params: {
       user: { avatar: avatar_file }
     }
@@ -62,7 +62,7 @@ class UserProfilePhotoTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     # Submit form with both name and avatar
-    avatar_file = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    avatar_file = fixture_file_upload("avatar.jpg", "image/jpeg")
     patch user_path(@user), params: {
       user: {
         name: "Garden Enthusiast",
@@ -252,7 +252,7 @@ class UserProfilePhotoTest < ActionDispatch::IntegrationTest
   test "updating name alone preserves existing avatar" do
     # Arrange - User has an avatar
     sign_in @user
-    avatar_file = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    avatar_file = fixture_file_upload("avatar.jpg", "image/jpeg")
     @user.avatar.attach(avatar_file)
     @user.save!
     original_blob_id = @user.avatar.blob.id
@@ -284,7 +284,7 @@ class UserProfilePhotoTest < ActionDispatch::IntegrationTest
   test "uploaded avatar is visible to other users viewing profile" do
     # Arrange - User one uploads an avatar
     sign_in @user
-    avatar_file = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    avatar_file = fixture_file_upload("avatar.jpg", "image/jpeg")
     patch user_path(@user), params: {
       user: { avatar: avatar_file }
     }
