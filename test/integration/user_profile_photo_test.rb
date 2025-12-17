@@ -90,7 +90,7 @@ class UserProfilePhotoTest < ActionDispatch::IntegrationTest
   test "user can replace existing avatar with new upload" do
     # Arrange - User already has an avatar
     sign_in @user
-    first_avatar = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    first_avatar = fixture_file_upload("avatar.jpg", "image/jpeg")
     @user.avatar.attach(first_avatar)
     @user.save!
     first_blob_id = @user.avatar.blob.id
@@ -107,7 +107,7 @@ class UserProfilePhotoTest < ActionDispatch::IntegrationTest
     assert_match /Custom photo uploaded/, response.body
 
     # Upload new avatar
-    new_avatar = fixture_file_upload("files/avatar.jpg", "image/jpeg")
+    new_avatar = fixture_file_upload("avatar.jpg", "image/jpeg")
     patch user_path(@user), params: {
       user: { avatar: new_avatar }
     }
